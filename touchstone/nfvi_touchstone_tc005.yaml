@@ -1,0 +1,86 @@
+---
+# Yardstick TC005 config file
+# Measure Storage IOPS, throughput and latency using fio
+
+schema: "yardstick:task:0.1"
+{% set FIXED_NET_ID = FIXED_NET_ID or false %}
+{% set FIXED_SUBNET_ID = FIXED_SUBNET_ID or false %}
+{% set rw_scenarios = rw_scenarios or ['read', 'write', 'randwrite', 'randread', 'rw'] %}
+{% set block_sizes = block_sizes or ['4k', '64k', '1024k'] %}
+
+scenarios:
+{% for rw in rw_scenarios %}
+  {% for bs in block_sizes %}
+-
+  type: Fio
+  options:
+    filename: /home/ubuntu/data.raw
+    bs: {{bs}}
+    rw: {{rw}}
+    ramp_time: 10
+    duration: 20
+
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  host:
+    name: "host.touchstone_tc005"
+    public_ip_attr: "server1_private_ip"
+  {% else %}
+  host: host.touchstone_tc005
+  {% endif %}
+
+  runner:
+    type: Iteration
+    iterations: 1
+    interval: 1
+
+  {% if TC005_READ_BW or TC005_READ_IOPS or TC005_READ_LAT or TC005_WRITE_BW or TC005_WRITE_IOPS or TC005_WRITE_LAT %}
+  sla:
+    {% if TC005_READ_BW %}
+    read_bw: {{TC005_READ_BW}}
+    {% endif %}
+    {% if TC005_READ_IOPS %}
+    read_iops: {{TC005_READ_IOPS}}
+    {% endif %}
+    {% if TC005_READ_LAT %}
+    read_lat: {{TC005_READ_LAT}}
+    {% endif %}
+    {% if TC005_WRITE_BW %}
+    write_bw: {{TC005_WRITE_BW}}
+    {% endif %}
+    {% if TC005_WRITE_IOPS %}
+    write_iops: {{TC005_WRITE_IOPS}}
+    {% endif %}
+    {% if TC005_WRITE_LAT %}
+    write_lat: {{TC005_WRITE_LAT}}
+    {% endif %}
+    action: monitor
+  {% endif %}
+
+  {% endfor %}
+{% endfor %}
+
+context:
+  name: touchstone_tc005
+  user: ubuntu
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  heat_template: boot_with_existing_nic_and_vol.yaml
+  heat_parameters:
+    image: touchstone-server
+    key_name: yardstick-key
+    flavor: touchstone-flavor
+    nic_id: {{FIXED_NET_ID}}
+    subnet_id: {{FIXED_SUBNET_ID}}
+    server_1_name: host.touchstone_tc005
+    server_2_name: target.touchstone_tc005
+  {% else %}
+  image: touchstone-server
+  flavor: touchstone-flavor
+
+  servers:
+    host:
+      floating_ip: true
+
+  networks:
+    test:
+      cidr: '10.0.1.0/24'
+  {% endif %}

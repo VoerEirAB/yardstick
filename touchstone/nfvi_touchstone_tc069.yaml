@@ -1,0 +1,59 @@
+---
+# Yardstick TC069 config file
+# Measure memory read and write bandwidth using ramspeed
+
+schema: "yardstick:task:0.1"
+{% set FIXED_NET_ID = FIXED_NET_ID or false %}
+{% set FIXED_SUBNET_ID = FIXED_SUBNET_ID or false %}
+scenarios:
+-
+  type: Ramspeed
+  options:
+    type_id: 1
+    load: 32
+    block_size: 64
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  host:
+    name: "host.touchstone_tc069"
+    public_ip_attr: "server1_private_ip"
+    private_ip_attr: "server1_private_ip"
+  {% else %}
+  host: host.touchstone_tc069
+  {% endif %}
+
+  runner:
+    type: Iteration
+    iterations: 5
+    interval: 1
+
+  {% if TC069_MIN_BANDWIDTH %}
+  sla:
+    min_bandwidth: {{TC069_MIN_BANDWIDTH}}
+    action: monitor
+  {% endif %}
+
+
+context:
+  name: touchstone_tc069
+  user: ubuntu
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  heat_template: boot_vm_with_existing_nic.yaml
+  heat_parameters:
+    image: touchstone-server
+    key_name: yardstick-key
+    flavor: touchstone-flavor
+    nic_id: {{FIXED_NET_ID}}
+    subnet_id: {{FIXED_SUBNET_ID}}
+    server_1_name: host.touchstone_tc069
+  {% else %}
+  image: touchstone-server
+  flavor: touchstone-flavor
+
+  servers:
+    host:
+      floating_ip: true
+
+  networks:
+    test:
+      cidr: '10.0.1.0/24'
+  {% endif %}

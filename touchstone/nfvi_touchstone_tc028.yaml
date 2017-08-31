@@ -1,0 +1,70 @@
+---
+
+schema: "yardstick:task:0.1"
+
+{% set affinity = affinity or 1 %}
+{% set interval = interval or 1000 %}
+{% set priority = priority or 99 %}
+{% set loops = loops or 1000 %}
+{% set threads = threads or 1 %}
+{% set histogram = histogram or 90 %}
+
+schema: "yardstick:task:0.1"
+
+
+scenarios:
+-
+  type: Cyclictest
+  options:
+    affinity: {{affinity}}
+    interval: {{interval}}
+    priority: {{priority}}
+    loops: {{loops}}
+    threads: {{threads}}
+    histogram: {{histogram}}
+  host: kvm.touchstone_tc028
+  runner:
+    type: Duration
+    duration: 60
+    interval: 1
+  {% if TC028_MIN_KVM_LATENCY  or TC028_AVG_KVM_LATENCY or TC028_MAX_KVM_LATENCY %}
+  sla:
+  {% if TC028_MIN_KVM_LATENCY %}
+    max_min_latency: {{ TC028_MIN_KVM_LATENCY }}
+  {% endif %}
+
+  {% if TC028_AVG_KVM_LATENCY %}
+    max_avg_latency: {{ TC028_AVG_KVM_LATENCY }}
+  {% endif %}
+
+  {% if TC028_MAX_KVM_LATENCY %}
+    max_max_latency: {{ TC028_MAX_KVM_LATENCY }}
+  {% endif %}
+    action: monitor
+  {% endif %}
+
+context:
+  name: touchstone_tc028
+  user: ubuntu
+
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  heat_template: boot_with_existing_nic_and_vol.yaml
+  heat_parameters:
+    image: touchstone-server
+    key_name: yardstick-key
+    flavor: touchstone-flavor
+    nic_id: {{FIXED_NET_ID}}
+    subnet_id: {{FIXED_SUBNET_ID}}
+    server_1_name: host.touchstone_tc037
+    server_2_name: target.touchstone_tc037
+  {% else %}
+  image: touchstone-server
+  flavor: touchstone-flavor
+
+  servers:
+    kvm:
+      floating_ip: true
+  networks:
+    test:
+      cidr: "10.0.1.0/24"
+  {% endif %}

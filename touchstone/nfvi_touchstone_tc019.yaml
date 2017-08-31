@@ -1,0 +1,49 @@
+---
+# Sample test case for the HA of controller node Openstack service
+
+schema: "yardstick:task:0.1"
+
+{% set file = file or 'pod.yaml' %}
+{% set OUTAGE_TIME = OUTAGE_TIME or 5 %}
+{% set RECOVERY_TIME = RECOVERY_TIME or 5 %}
+{% set WAIT_TIME = WAIT_TIME or 10 %}
+
+scenarios:
+-
+  type: ServiceHA
+  options:
+    attackers:
+    - fault_type: "kill-process"
+      process_name: "nova-api"
+      host: controller_node
+
+    wait_time: {{WAIT_TIME}}
+    monitors:
+    - monitor_type: "openstack-cmd"
+      command_name: "nova image-list"
+      sla:
+        max_outage_time: {{OUTAGE_TIME}}
+    - monitor_type: "process"
+      process_name: "nova-api"
+      sla:
+        max_recover_time: {{RECOVERY_TIME}}
+      host: controller_node
+
+  nodes:
+    controller_node: controller_node.LF
+
+  runner:
+    type: Iteration
+    iterations: 1
+
+  {% if TC019_MAX_OUTAGE_TIME %}
+  sla:
+    max_outage_time: {{ TC019_MAX_OUTAGE_TIME }}
+    action: monitor
+  {% endif %}
+
+
+context:
+  type: Node
+  name: LF
+  file: {{file}}

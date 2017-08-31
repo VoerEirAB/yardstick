@@ -1,0 +1,53 @@
+---
+# Sample benchmark task config file
+# Reading processor load/statistics
+
+schema: "yardstick:task:0.1"
+
+run_in_parallel: true
+{% set interval = interval or 2 %}
+{% set FIXED_NET_ID = FIXED_NET_ID or false %}
+{% set FIXED_SUBNET_ID = FIXED_SUBNET_ID or false %}
+scenarios:
+-
+  type: CPUload
+  options:
+    interval: {{interval}}
+
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  host:
+    name: "host.touchstone_tc024"
+    public_ip_attr: "server1_private_ip"
+  {% else %}
+  host: host.touchstone_tc024
+  {% endif %}
+
+  runner:
+    type: Duration
+    duration: 60
+
+context:
+  name: touchstone_tc024
+  user: ubuntu
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  heat_template: boot_vm_with_existing_nic.yaml
+  heat_parameters:
+    image: touchstone-server
+    key_name: yardstick-key
+    flavor: touchstone-flavor
+    nic_id: {{FIXED_NET_ID}}
+    subnet_id: {{FIXED_SUBNET_ID}}
+    server_1_name: host.touchstone_tc024
+  {% else %}
+  image: touchstone-server
+  flavor: touchstone-flavor
+
+  servers:
+    host:
+      floating_ip: true
+
+  networks:
+    test:
+      cidr: '10.0.1.0/24'
+  {% endif %}
+

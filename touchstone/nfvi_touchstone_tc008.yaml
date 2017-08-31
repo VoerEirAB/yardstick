@@ -1,0 +1,91 @@
+---
+# Yardstick TC008 config file
+# Measure network throughput and packet loss using Pktgen.
+# Different amount of flows, from 2 up to 1001000, in combination
+# with different packet sizes are run in each test.
+# Each combination of packet size and flow amount is run 10 times.
+# First 10 times with the smallest packet size, starting with the
+# least amount of ports/flows, then next amount of ports with same
+# packet size, and so on. The test sequence continues with the next
+# packet size, with same ports/flows sequence as before.
+
+schema: "yardstick:task:0.1"
+{% set FIXED_NET_ID = FIXED_NET_ID or false %}
+{% set FIXED_SUBNET_ID = FIXED_SUBNET_ID or false %}
+{% set packet_sizes = packet_sizes or [64, 128, 256, 512, 1024, 1280, 1518] %}
+{% set number_of_ports = number_of_ports or [1, 10, 50, 100, 500, 1000] %}
+
+scenarios:
+{% for pkt_size in packet_sizes %}
+  {% for num_ports in number_of_ports %}
+-
+  type: Pktgen
+  options:
+    packetsize: {{pkt_size}}
+    number_of_ports: {{num_ports}}
+    duration: 20
+
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  host:
+    name: "host.touchstone_tc008"
+    public_ip_attr: "server1_private_ip"
+  {% else %}
+  host: host.touchstone_tc008
+  {% endif %}
+
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  target:
+    name: "target.touchstone_tc008"
+    private_ip_attr: "server2_private_ip"
+    public_ip_attr: "server2_private_ip"
+  {% else %}
+  target: target.touchstone_tc008
+  {% endif %}
+
+  runner:
+    type: Iteration
+    iterations: 10
+    interval: 1
+
+  {% if TC008_MAX_PPM %}
+  sla:
+    max_ppm: {{TC008_MAX_PPM}}
+    action: monitor
+  {% endif %}
+  
+  {% endfor %}
+{% endfor %}
+
+context:
+  name: touchstone_tc008
+  user: ubuntu
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  heat_template: boot_with_existing_nic_and_vol.yaml
+  heat_parameters:
+    image: touchstone-server
+    key_name: yardstick-key
+    flavor: touchstone-flavor
+    nic_id: {{FIXED_NET_ID}}
+    subnet_id: {{FIXED_SUBNET_ID}}
+    server_1_name: host.touchstone_tc008
+    server_2_name: target.touchstone_tc008
+  {% else %}
+  image: touchstone-server
+  flavor: touchstone-flavor
+
+  placement_groups:
+    pgrp1:
+      policy: "availability"
+
+  servers:
+    host:
+      floating_ip: true
+      placement: "pgrp1"
+    target:
+      floating_ip: true
+      placement: "pgrp1"
+      different_host: "host.touchstone_tc008"
+  networks:
+    test:
+      cidr: '10.0.1.0/24'
+  {% endif %}

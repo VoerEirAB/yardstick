@@ -1,0 +1,23 @@
+---
+
+schema: "yardstick:task:0.1"
+description: >
+    Yardstick TC075 config file;
+    Measure network capacity and scale.
+    Measure number of connections, number of frames received;
+
+{% set file = file or 'pod.yaml' %}
+
+scenarios:
+-
+  type: NetworkCapacity
+  host: compute_node.LF
+
+  runner:
+    type: Iteration
+    iterations: 1
+
+context:
+  type: Node
+  name: LF
+  file: {{file}}
