@@ -8,6 +8,9 @@ schema: "yardstick:task:0.1"
 {% set loops = loops or 1000 %}
 {% set threads = threads or 1 %}
 {% set histogram = histogram or 90 %}
+{% set FIXED_NET_ID = FIXED_NET_ID or false %}
+{% set FIXED_SUBNET_ID = FIXED_SUBNET_ID or false %}
+
 
 schema: "yardstick:task:0.1"
 
@@ -48,15 +51,14 @@ context:
   user: ubuntu
 
   {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
-  heat_template: boot_with_existing_nic_and_vol.yaml
+  heat_template: boot_vm_with_existing_nic.yaml
   heat_parameters:
     image: touchstone-server
     key_name: yardstick-key
     flavor: touchstone-flavor
     nic_id: {{FIXED_NET_ID}}
     subnet_id: {{FIXED_SUBNET_ID}}
-    server_1_name: host.touchstone_tc037
-    server_2_name: target.touchstone_tc037
+    server_1_name: kvm.touchstone_tc028
   {% else %}
   image: touchstone-server
   flavor: touchstone-flavor
