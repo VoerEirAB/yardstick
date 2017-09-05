@@ -1,0 +1,41 @@
+---
+# Touchstone task suite
+
+schema: "yardstick:suite:0.1"
+
+name: "Touchstone Test Suite"
+test_cases_dir: "touchstone/"
+test_cases:
+-
+  file_name: opnfv_yardstick_tc001.yaml
+  task_args_file: touchstone_args.json
+-
+  file_name: opnfv_yardstick_tc002.yaml
+  task_args_file: touchstone_args.json
+-
+  file_name: opnfv_yardstick_tc005.yaml
+  task_args_file: touchstone_args.json
+-
+  file_name: opnfv_yardstick_tc008.yaml
+  task_args_file: touchstone_args.json
+-
+  file_name: opnfv_yardstick_tc009.yaml
+  task_args_file: touchstone_args.json
+-
+  file_name: opnfv_yardstick_tc010.yaml
+  task_args_file: touchstone_args.json
+-
+  file_name: opnfv_yardstick_tc011.yaml
+  task_args_file: touchstone_args.json
+-
+  file_name: opnfv_yardstick_tc012.yaml
+  task_args_file: touchstone_args.json
+-
+  file_name: opnfv_yardstick_tc014.yaml
+  task_args_file: touchstone_args.json
+-
+  file_name: opnfv_yardstick_tc037.yaml
+  task_args_file: touchstone_args.json
+-
+  file_name: opnfv_yardstick_tc038.yaml
+  task_args_file: touchstone_args.json
