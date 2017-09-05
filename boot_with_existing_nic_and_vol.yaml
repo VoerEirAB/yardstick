@@ -1,0 +1,77 @@
+heat_template_version: 2013-05-23
+
+description: >
+  HOT template to create a new neutron network plus a router to the public
+  network, and for deploying two servers into the new network. The template also
+  assigns floating IP addresses to each server so they are routable from the
+  public network.
+parameters:
+  key_name:
+    type: string
+    description: Name of keypair to assign to servers
+  server_1_name:
+    type: string
+    description: Name of VM1
+  server_2_name:
+    type: string
+    description: Name of VM2
+  image:
+    type: string
+    description: Name of image to use for servers
+  flavor:
+    type: string
+    description: Flavor to use for servers
+  nic_id:
+    type: string
+    description: Id of existing network.
+  subnet_id:
+    type: string
+    description: Id of subnet with existing network.
+
+resources:
+  server1:
+    type: OS::Nova::Server
+    properties:
+      name: { get_param: server_1_name }
+      flavor: { get_param: flavor }
+      image: { get_param: image }
+      key_name: { get_param: key_name }
+      admin_user: ubuntu
+      config_drive: "true"
+      networks:
+        - port: { get_resource: server1_port }
+
+  server1_port:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_param: nic_id }
+      fixed_ips:
+        - subnet_id: { get_param: subnet_id }
+
+  server2:
+    type: OS::Nova::Server
+    properties:
+      name: { get_param: server_2_name }
+      flavor: { get_param: flavor }
+      image: { get_param: image }
+      key_name: { get_param: key_name }
+      admin_user: ubuntu
+      scheduler_hints: {different_host: { get_resource: server1 } }
+      config_drive: "true"
+      networks:
+        - port: { get_resource: server2_port }
+
+  server2_port:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_param: nic_id }
+      fixed_ips:
+        - subnet_id: { get_param: subnet_id }
+
+outputs:
+  server1_private_ip:
+    description: IP address of server1 in private network
+    value: { get_attr: [ server1, first_address ] }
+  server2_private_ip:
+    description: IP address of server2 in private network
+    value: { get_attr: [ server2, first_address ] }

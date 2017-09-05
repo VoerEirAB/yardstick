@@ -77,6 +77,8 @@ class HeatContext(Context):
         self.template_file = attrs.get("heat_template")
         if self.template_file:
             self.heat_parameters = attrs.get("heat_parameters")
+            self.key_filename = ''.join(
+            [YARDSTICK_ROOT_PATH, 'yardstick/resources/files/yardstick_key'])
             return
 
         self.keypair_name = self.name + "-key"
@@ -261,7 +263,7 @@ class HeatContext(Context):
             self.stack = None
             print("Context '%s' undeployed" % self.name)
 
-        if os.path.exists(self.key_filename):
+        if os.path.exists(self.key_filename) and not self.template_file:
             try:
                 os.remove(self.key_filename)
                 os.remove(self.key_filename + ".pub")
@@ -306,7 +308,7 @@ class HeatContext(Context):
 
         result = {
             "user": server.context.user,
-            "key_filename": key_filename,
+            "key_filename": self.key_filename,
             "private_ip": server.private_ip
         }
         # Target server may only have private_ip
