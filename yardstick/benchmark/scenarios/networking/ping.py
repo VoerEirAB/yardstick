@@ -66,6 +66,8 @@ class Ping(base.Scenario):
             else:
                 target_vm = self.scenario_cfg['target']
 
+            target_vm = target_vm['name'] if isinstance(target_vm, dict)\
+                else target_vm
             LOG.debug("ping '%s' '%s'", options, dest)
             with open(self.target_script, "r") as stdin_file:
                 exit_status, stdout, stderr = self.connection.execute(
