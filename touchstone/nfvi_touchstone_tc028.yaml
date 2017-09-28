@@ -8,65 +8,53 @@ schema: "yardstick:task:0.1"
 {% set loops = loops or 1000 %}
 {% set threads = threads or 1 %}
 {% set histogram = histogram or 90 %}
-{% set FIXED_NET_ID = FIXED_NET_ID or false %}
-{% set FIXED_SUBNET_ID = FIXED_SUBNET_ID or false %}
-
-
-schema: "yardstick:task:0.1"
-
+{% set file = file or 'pod.yaml' %}
 
 scenarios:
 -
   type: Cyclictest
   options:
-    affinity: {{affinity}}
-    interval: {{interval}}
-    priority: {{priority}}
-    loops: {{loops}}
-    threads: {{threads}}
-    histogram: {{histogram}}
-  host: kvm.touchstone_tc028
+    affinity: {{ affinity }}
+    interval: {{ interval }}
+    priority: {{ priority }}
+    loops: {{ loops }}
+    threads: {{ threads }}
+    histogram: {{ histogram }}
+  host: compute_node.LF
   runner:
     type: Duration
-    duration: 60
+    duration: 1
     interval: 1
-  {% if TC028_MIN_KVM_LATENCY  or TC028_AVG_KVM_LATENCY or TC028_MAX_KVM_LATENCY %}
+
+  {% if TC028_MIN_KVM_LATENCY or TC028_AVG_KVM_LATENCY or TC028_MAX_KVM_LATENCY %}
   sla:
-  {% if TC028_MIN_KVM_LATENCY %}
-    max_min_latency: {{ TC028_MIN_KVM_LATENCY }}
-  {% endif %}
-
-  {% if TC028_AVG_KVM_LATENCY %}
-    max_avg_latency: {{ TC028_AVG_KVM_LATENCY }}
-  {% endif %}
-
-  {% if TC028_MAX_KVM_LATENCY %}
-    max_max_latency: {{ TC028_MAX_KVM_LATENCY }}
-  {% endif %}
+    {% if TC028_MIN_KVM_LATENCY %}
+    max_min_latency: 50
+    {% endif %}
+    {% if TC028_AVG_KVM_LATENCY %}
+    max_avg_latency: 100
+    {% endif %}
+    {% if TC028_MAX_KVM_LATENCY %}
+    max_max_latency: 1000
+    {% endif %}
     action: monitor
   {% endif %}
+  setup_options:
+    rpm_dir: "/opt/rpm"
+    script_dir: "/opt/scripts"
+    image_dir: "/opt/image"
+    host_setup_seqs:
+    - "host-setup0.sh"
+    - "reboot"
+    - "host-setup1.sh"
+    - "host-run-qemu.sh"
+    guest_setup_seqs:
+    - "guest-setup0.sh"
+    - "reboot"
+    - "guest-setup1.sh"
 
 context:
-  name: touchstone_tc028
-  user: ubuntu
+  type: Node
+  name: LF
+  file: {{ file }}
 
-  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
-  heat_template: boot_vm_with_existing_nic.yaml
-  heat_parameters:
-    image: touchstone-server
-    key_name: yardstick-key
-    flavor: touchstone-flavor
-    nic_id: {{FIXED_NET_ID}}
-    subnet_id: {{FIXED_SUBNET_ID}}
-    server_1_name: kvm.touchstone_tc028
-  {% else %}
-  image: touchstone-server
-  flavor: touchstone-flavor
-
-  servers:
-    kvm:
-      floating_ip: true
-  networks:
-    test:
-      cidr: "10.0.1.0/24"
-  {% endif %}
