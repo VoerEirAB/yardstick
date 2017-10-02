@@ -7,6 +7,9 @@ schema: "yardstick:task:0.1"
 {% set FIXED_SUBNET_ID = FIXED_SUBNET_ID or false %}
 {% set number_of_ports = number_of_ports or [1, 10, 50, 100, 500, 1000] %}
 {% set packet_sizes = packet_sizes or [64, 128, 256, 512, 1024, 1280, 1518] %}
+{% set IMAGE_NAME = IMAGE_NAME or 'touchstone-server' %}
+{% set FLAVOR_NAME = FLAVOR_NAME or 'touchstone-flavor' %}
+
 scenarios:
 {% for pkt_size in packet_sizes %}
 -
@@ -50,16 +53,16 @@ context:
   {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
   heat_template: boot_with_existing_nic_and_vol.yaml
   heat_parameters:
-    image: touchstone-server-dpdk
+    image: {{IMAGE_NAME}}-dpdk
     key_name: yardstick-key
-    flavor: touchstone-flavor
+    flavor: {{FLAVOR_NAME}}
     nic_id: {{FIXED_NET_ID}}
     subnet_id: {{FIXED_SUBNET_ID}}
     server_1_name: host.touchstone_tc042
     server_2_name: target.touchstone_tc042
   {% else %}
-  image: touchstone-server-dpdk
-  flavor: touchstone-flavor
+  image: {{IMAGE_NAME}}-dpdk
+  flavor: {{FLAVOR_NAME}}
 
   placement_groups:
     pgrp1:
