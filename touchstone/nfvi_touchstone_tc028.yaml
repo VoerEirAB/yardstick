@@ -29,13 +29,13 @@ scenarios:
   {% if TC028_MIN_KVM_LATENCY or TC028_AVG_KVM_LATENCY or TC028_MAX_KVM_LATENCY %}
   sla:
     {% if TC028_MIN_KVM_LATENCY %}
-    max_min_latency: 50
+    max_min_latency: {{ TC028_MIN_KVM_LATENCY }}
     {% endif %}
     {% if TC028_AVG_KVM_LATENCY %}
-    max_avg_latency: 100
+    max_avg_latency: {{ TC028_AVG_KVM_LATENCY }}
     {% endif %}
     {% if TC028_MAX_KVM_LATENCY %}
-    max_max_latency: 1000
+    max_max_latency: {{ TC028_MAX_KVM_LATENCY }}
     {% endif %}
     action: monitor
   {% endif %}

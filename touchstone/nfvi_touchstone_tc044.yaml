@@ -5,6 +5,9 @@
 schema: "yardstick:task:0.1"
 {% set FIXED_NET_ID = FIXED_NET_ID or false %}
 {% set FIXED_SUBNET_ID = FIXED_SUBNET_ID or false %}
+{% set IMAGE_NAME = IMAGE_NAME or 'touchstone-server' %}
+{% set FLAVOR_NAME = FLAVOR_NAME or 'touchstone-flavor' %}
+
 scenarios:
 -
   type: MEMORYload
@@ -31,15 +34,15 @@ context:
   {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
   heat_template: boot_vm_with_existing_nic.yaml
   heat_parameters:
-    image: touchstone-server
+    image: {{IMAGE_NAME}}
     key_name: yardstick-key
-    flavor: touchstone-flavor
+    flavor: {{FLAVOR_NAME}}
     nic_id: {{FIXED_NET_ID}}
     subnet_id: {{FIXED_SUBNET_ID}}
     server_1_name: host.touchstone_tc044
   {% else %}
-  image: touchstone-server
-  flavor: touchstone-flavor
+  image: {{IMAGE_NAME}}
+  flavor: {{FLAVOR_NAME}}
 
   servers:
     host:
