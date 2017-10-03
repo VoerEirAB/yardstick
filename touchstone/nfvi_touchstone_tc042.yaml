@@ -37,9 +37,9 @@ scenarios:
     iterations: 1
     interval: 1
 
-  {% if TC042_MAX_LAT %}
+  {% if TC042_MAX_LATENCY %}
   sla:
-    max_latency: {{TC042_MAX_LAT}}
+    max_latency: {{TC042_MAX_LATENCY}}
     action: monitor
   {% endif %}
 {% endfor %}
