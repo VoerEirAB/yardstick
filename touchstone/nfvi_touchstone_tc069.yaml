@@ -3,6 +3,9 @@
 # Measure memory read and write bandwidth using ramspeed
 
 schema: "yardstick:task:0.1"
+{% set TYPE_ID = TYPE_ID or 1 %}
+{% set LOAD = LOAD or 32 %}
+{% set BLOCK_SIZE = BLOCK_SIZE or 64 %}
 {% set FIXED_NET_ID = FIXED_NET_ID or false %}
 {% set FIXED_SUBNET_ID = FIXED_SUBNET_ID or false %}
 {% set IMAGE_NAME = IMAGE_NAME or 'touchstone-server' %}
@@ -12,9 +15,9 @@ scenarios:
 -
   type: Ramspeed
   options:
-    type_id: 1
-    load: 32
-    block_size: 64
+    type_id: {{TYPE_ID}}
+    load: {{LOAD}}
+    block_size: {{BLOCK_SIZE}}
   {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
   host:
     name: "host.touchstone_tc069"
@@ -60,3 +63,4 @@ context:
     test:
       cidr: '10.0.1.0/24'
   {% endif %}
+
