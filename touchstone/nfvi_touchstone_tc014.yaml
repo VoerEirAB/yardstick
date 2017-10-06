@@ -7,13 +7,16 @@ schema: "yardstick:task:0.1"
 {% set FIXED_SUBNET_ID = FIXED_SUBNET_ID or false %}
 {% set IMAGE_NAME = IMAGE_NAME or 'touchstone-server' %}
 {% set FLAVOR_NAME = FLAVOR_NAME or 'touchstone-flavor' %}
+{% set test_type = test_type or 'dhry2reg' %}
+{% set TC014_SINGLE_SCORE = TC014_SINGLE_SCORE or false %}
+{% set TC014_PARALLEL_SCORE = TC014_PARALLEL_SCORE or false %}
 
 scenarios:
 -
   type: UnixBench
   options:
     run_mode: 'verbose'
-    test_type: 'dhry2reg'
+    test_type: '{{test_type}}'
 
   {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
   host:
@@ -27,6 +30,17 @@ scenarios:
     type: Iteration
     iterations: 1
     interval: 1
+  
+  {% if TC014_SINGLE_SCORE or TC014_PARALLEL_SCORE  %}
+  sla:
+    {% if TC014_SINGLE_SCORE %}
+    single_score: {{TC014_SINGLE_SCORE}}
+    {% endif %}
+    {% if TC014_PARALLEL_SCORE %}
+    parallel_score: {{TC014_PARALLEL_SCORE}}
+    {% endif %}
+    action: monitor
+  {% endif %}
 
 context:
   name: touchstone_tc014
