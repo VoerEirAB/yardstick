@@ -7,6 +7,8 @@ schema: "yardstick:task:0.1"
 {% set OUTAGE_TIME = OUTAGE_TIME or 5 %}
 {% set RECOVERY_TIME = RECOVERY_TIME or 5 %}
 {% set WAIT_TIME = WAIT_TIME or 10 %}
+{% set MONITOR_TIME_OUTAGE = MONITOR_TIME_OUTAGE or 10 %}
+{% set MONITOR_TIME_RECOVERY = MONITOR_TIME_RECOVERY or 20 %}
 
 scenarios:
 -
@@ -20,11 +22,13 @@ scenarios:
     wait_time: {{WAIT_TIME}}
     monitors:
     - monitor_type: "openstack-cmd"
-      command_name: "nova image-list"
+      command_name: "openstack image list"
+      monitor_time: {{MONITOR_TIME_OUTAGE}}
       sla:
         max_outage_time: {{OUTAGE_TIME}}
     - monitor_type: "process"
       process_name: "nova-api"
+      monitor_time: {{MONITOR_TIME_RECOVERY}}
       sla:
         max_recover_time: {{RECOVERY_TIME}}
       host: controller_node
@@ -36,9 +40,9 @@ scenarios:
     type: Iteration
     iterations: 1
 
-  {% if TC019_MAX_OUTAGE_TIME %}
+  {% if TC019_OUTAGE_TIME %}
   sla:
-    max_outage_time: {{ TC019_MAX_OUTAGE_TIME }}
+    outage_time: {{ TC019_OUTAGE_TIME }}
     action: monitor
   {% endif %}
 
