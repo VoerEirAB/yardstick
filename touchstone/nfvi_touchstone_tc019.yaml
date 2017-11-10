@@ -4,8 +4,8 @@
 schema: "yardstick:task:0.1"
 
 {% set file = file or 'pod.yaml' %}
-{% set OUTAGE_TIME = OUTAGE_TIME or 5 %}
-{% set RECOVERY_TIME = RECOVERY_TIME or 5 %}
+{% set TC019_MAX_OUTAGE_TIME = TC019_MAX_OUTAGE_TIME or 5 %}
+{% set TC019_MAX_RECOVERY_TIME = TC019_MAX_RECOVERY_TIME or 5 %}
 {% set WAIT_TIME = WAIT_TIME or 10 %}
 {% set MONITOR_TIME_OUTAGE = MONITOR_TIME_OUTAGE or 10 %}
 {% set MONITOR_TIME_RECOVERY = MONITOR_TIME_RECOVERY or 20 %}
@@ -25,12 +25,12 @@ scenarios:
       command_name: "openstack image list"
       monitor_time: {{MONITOR_TIME_OUTAGE}}
       sla:
-        max_outage_time: {{OUTAGE_TIME}}
+        max_outage_time: {{TC019_MAX_OUTAGE_TIME}}
     - monitor_type: "process"
       process_name: "nova-api"
       monitor_time: {{MONITOR_TIME_RECOVERY}}
       sla:
-        max_recover_time: {{RECOVERY_TIME}}
+        max_recover_time: {{TC019_MAX_RECOVERY_TIME}}
       host: controller_node
 
   nodes:

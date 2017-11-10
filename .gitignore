@@ -1,5 +1,6 @@
 *.pyc
 .vimrc
+.idea/
 .ropeproject
 .settings/
 .eggs/
