@@ -30,6 +30,7 @@ scenarios:
   {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
   host:
     name: "host.touchstone_tc008"
+    private_ip_attr: "server1_private_ip"
     public_ip_attr: "server1_private_ip"
   {% else %}
   host: host.touchstone_tc008
