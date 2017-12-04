@@ -1,0 +1,25 @@
+---
+
+schema: "yardstick:task:0.1"
+description: >
+    Yardstick TC063 config file;
+    Measure disk size, block size and disk utilization using fdisk and iostat.
+
+{% set file = file or 'pod.yaml' %}
+
+scenarios:
+-
+  type: StorageCapacity
+  options:
+    test_type: "disk_size"
+
+  host: compute_node.LF
+
+  runner:
+    type: Iteration
+    iterations: 1
+
+context:
+  type: Node
+  name: LF
+  file: {{file}}

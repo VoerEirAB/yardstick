@@ -1,0 +1,78 @@
+---
+# measure network latency using ping
+
+schema: "yardstick:task:0.1"
+{% set FIXED_NET_ID = FIXED_NET_ID or false %}
+{% set FIXED_SUBNET_ID = FIXED_SUBNET_ID or false %}
+{% set IMAGE_NAME = IMAGE_NAME or 'touchstone-server' %}
+{% set FLAVOR_NAME = FLAVOR_NAME or 'touchstone-flavor' %}
+
+scenarios:
+{% for i in range(2) %}
+-
+  type: Ping
+  options:
+    packetsize: {{packet_size}}
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  host:
+    name: "host.touchstone_tc002"
+    public_ip_attr: "server1_private_ip"
+  {% else %}
+  host: host.touchstone_tc002
+  {% endif %}
+
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  target:
+    name: "target.touchstone_tc002"
+    private_ip_attr: "server2_private_ip"
+    public_ip_attr: "server2_private_ip"
+  {% else %}
+  target: target.touchstone_tc002
+  {% endif %}
+
+  runner:
+    type: Duration
+    duration: 600
+    interval: 10
+
+  {% if TC002_MAX_RTT %}
+  sla:
+    max_rtt: {{TC002_MAX_RTT}}
+    action: monitor
+  {% endif %}
+
+{% endfor %}
+
+context:
+  name: touchstone_tc002
+  user: ubuntu
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  heat_template: boot_with_existing_nic_and_vol.yaml
+  heat_parameters:
+    image: {{IMAGE_NAME}}
+    key_name: yardstick-key
+    flavor: {{FLAVOR_NAME}}
+    nic_id: {{FIXED_NET_ID}}
+    subnet_id: {{FIXED_SUBNET_ID}}
+    server_1_name: host.touchstone_tc002
+    server_2_name: target.touchstone_tc002
+  {% else %}
+  image: {{IMAGE_NAME}}
+  flavor: {{FLAVOR_NAME}}
+
+  placement_groups:
+    pgrp1:
+      policy: "availability"
+
+  servers:
+    host:
+      floating_ip: true
+      placement: "pgrp1"
+    target:
+      placement: "pgrp1"
+      different_host: "host.touchstone_tc002"
+
+  networks:
+    test:
+      cidr: '10.0.1.0/24'
+  {% endif %}

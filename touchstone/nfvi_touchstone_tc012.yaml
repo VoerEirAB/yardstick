@@ -1,0 +1,64 @@
+---
+# Yardstick TC012 config file
+# Measure memory read and write bandwidth using lmbench
+
+schema: "yardstick:task:0.1"
+
+{% set FIXED_NET_ID = FIXED_NET_ID or false %}
+{% set FIXED_SUBNET_ID = FIXED_SUBNET_ID or false %}
+{% set IMAGE_NAME = IMAGE_NAME or 'touchstone-server' %}
+{% set FLAVOR_NAME = FLAVOR_NAME or 'touchstone-flavor' %}
+
+scenarios:
+-
+  type: Lmbench
+  options:
+    test_type: "bandwidth"
+    size: {{size}}
+    benchmark: {{benchmark}}
+    warmup: 0
+
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  host:
+    name: "host.touchstone_tc012"
+    public_ip_attr: "server1_private_ip"
+  {% else %}
+  host: host.touchstone_tc012
+  {% endif %}
+
+  runner:
+    type: Iteration
+    iterations: 10
+    interval: 1
+
+  {% if TC012_MIN_BANDWIDTH %}
+  sla:
+    min_bandwidth: {{TC012_MIN_BANDWIDTH}}
+    action: monitor
+  {% endif %}
+
+context:
+  name: touchstone_tc012
+  user: ubuntu
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  heat_template: boot_vm_with_existing_nic.yaml
+  heat_parameters:
+    image: {{IMAGE_NAME}}
+    key_name: yardstick-key
+    flavor: {{FLAVOR_NAME}}
+    nic_id: {{FIXED_NET_ID}}
+    subnet_id: {{FIXED_SUBNET_ID}}
+    server_1_name: host.touchstone_tc012
+  {% else %}
+  image: {{IMAGE_NAME}}
+  flavor: {{FLAVOR_NAME}}
+
+  servers:
+    host:
+      floating_ip: true
+
+  networks:
+    test:
+      cidr: '10.0.1.0/24'
+  {% endif %}
+

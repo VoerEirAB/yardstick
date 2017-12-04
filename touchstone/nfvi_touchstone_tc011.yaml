@@ -1,0 +1,78 @@
+---
+# Yardstick TC011 config file
+# Measure packet delay variation (jitter) using iperf3
+
+schema: "yardstick:task:0.1"
+{% set FIXED_NET_ID = FIXED_NET_ID or false %}
+{% set FIXED_SUBNET_ID = FIXED_SUBNET_ID or false %}
+{% set IMAGE_NAME = IMAGE_NAME or 'touchstone-server' %}
+{% set FLAVOR_NAME = FLAVOR_NAME or 'touchstone-flavor' %}
+
+scenarios:
+-
+  type: Iperf3
+  options:
+    udp: udp
+    bandwidth: 20m
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  host:
+    name: "host.touchstone_tc011"
+    public_ip_attr: "server1_private_ip"
+    private_ip_attr: "server1_private_ip"
+  {% else %}
+  host: host.touchstone_tc011
+  {% endif %}
+
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  target:
+    name: "target.touchstone_tc011"
+    private_ip_attr: "server2_private_ip"
+    public_ip_attr: "server2_private_ip"
+  {% else %}
+  target: target.touchstone_tc011
+  {% endif %}
+
+  runner:
+    type: Duration
+    duration: 30
+
+  {% if TC011_JITTER %}
+  sla:
+    jitter: {{TC011_JITTER}}
+    action: monitor
+  {% endif %}
+
+context:
+  name: touchstone_tc011
+  user: ubuntu
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  heat_template: boot_with_existing_nic_and_vol.yaml
+  heat_parameters:
+    image: {{IMAGE_NAME}}
+    key_name: yardstick-key
+    flavor: {{FLAVOR_NAME}}
+    nic_id: {{FIXED_NET_ID}}
+    subnet_id: {{FIXED_SUBNET_ID}}
+    server_1_name: host.touchstone_tc011
+    server_2_name: target.touchstone_tc011
+  {% else %}
+  image: {{IMAGE_NAME}}
+  flavor: {{FLAVOR_NAME}}
+
+  placement_groups:
+    pgrp1:
+      policy: "availability"
+
+  servers:
+    host:
+      floating_ip: true
+      placement: "pgrp1"
+    target:
+      floating_ip: true
+      placement: "pgrp1"
+      different_host: "host.touchstone_tc011"
+
+  networks:
+    test:
+      cidr: '10.0.1.0/24'
+  {% endif %}

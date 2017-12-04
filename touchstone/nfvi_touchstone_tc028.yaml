@@ -1,0 +1,60 @@
+---
+
+schema: "yardstick:task:0.1"
+
+{% set affinity = affinity or 1 %}
+{% set interval = interval or 1000 %}
+{% set priority = priority or 99 %}
+{% set loops = loops or 1000 %}
+{% set threads = threads or 1 %}
+{% set histogram = histogram or 90 %}
+{% set file = file or 'pod.yaml' %}
+
+scenarios:
+-
+  type: Cyclictest
+  options:
+    affinity: {{ affinity }}
+    interval: {{ interval }}
+    priority: {{ priority }}
+    loops: {{ loops }}
+    threads: {{ threads }}
+    histogram: {{ histogram }}
+  host: compute_node.LF
+  runner:
+    type: Duration
+    duration: 1
+    interval: 1
+
+  {% if TC028_MIN_KVM_LATENCY or TC028_AVG_KVM_LATENCY or TC028_MAX_KVM_LATENCY %}
+  sla:
+    {% if TC028_MIN_KVM_LATENCY %}
+    max_min_latency: {{ TC028_MIN_KVM_LATENCY }}
+    {% endif %}
+    {% if TC028_AVG_KVM_LATENCY %}
+    max_avg_latency: {{ TC028_AVG_KVM_LATENCY }}
+    {% endif %}
+    {% if TC028_MAX_KVM_LATENCY %}
+    max_max_latency: {{ TC028_MAX_KVM_LATENCY }}
+    {% endif %}
+    action: monitor
+  {% endif %}
+  setup_options:
+    rpm_dir: "/opt/rpm"
+    script_dir: "/opt/scripts"
+    image_dir: "/opt/image"
+    host_setup_seqs:
+    - "host-setup0.sh"
+    - "reboot"
+    - "host-setup1.sh"
+    - "host-run-qemu.sh"
+    guest_setup_seqs:
+    - "guest-setup0.sh"
+    - "reboot"
+    - "guest-setup1.sh"
+
+context:
+  type: Node
+  name: LF
+  file: {{ file }}
+
