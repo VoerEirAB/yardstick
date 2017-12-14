@@ -1,0 +1,134 @@
+---
+# Sample benchmark task config file
+# measure network latency and throughput using netperf
+# There are two sample scenarios: bulk test and request/response test
+# In bulk test, UDP_STREAM and TCP_STREAM can be used
+# send_msg_size and recv_msg_size are options of bulk test
+# In req/rsp test, TCP_RR TCP_CRR UDP_RR can be used
+# req_rsp_size is option of req/rsp test
+
+schema: "yardstick:task:0.1"
+
+description: >
+    Yardstick TC083 config file;
+    Measure network latency and throughput using netperf.
+
+{% set provider = provider or none %}
+{% set physical_network = physical_network or 'physnet1' %}
+{% set segmentation_id = segmentation_id or none %}
+
+{% set FIXED_NET_ID = FIXED_NET_ID or false %}
+{% set FIXED_SUBNET_ID = FIXED_SUBNET_ID or false %}
+{% set PACKET_SIZE = PACKET_SIZE or 1024%}
+{% set DURATION = DURATION or 20 %}
+{% set ITERATIONS = ITERATIONS or 1 %}
+{% set INTERVAL = INTERVAL or 1 %}
+{% set TC083_MEAN_LATENCY = TC083_MEAN_LATENCY or 100 %}
+
+scenarios:
+-
+  type: Netperf
+  options:
+    testname: 'UDP_STREAM'
+    send_msg_size: {{ PACKET_SIZE }}
+    duration: {{ DURATION }}
+
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  host:
+    name: "host.touchstone_tc083"
+    public_ip_attr: "server1_private_ip"
+    private_ip_attr: "server1_private_ip"
+  {% else %}
+  host: host.touchstone_tc083
+  {% endif %}
+
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  target:
+    name: "target.touchstone_tc083"
+    public_ip_attr: "server2_private_ip"
+    private_ip_attr: "server2_private_ip"
+  {% else %}
+  target: target.touchstone_tc083
+  {% endif %}
+
+  runner:
+    type: Iteration
+    iterations: {{ ITERATIONS }}
+    interval: {{ INTERVAL }}
+  sla:
+    mean_latency: {{ TC083_MEAN_LATENCY }}
+    action: monitor
+-
+  type: Netperf
+  options:
+    testname: 'TCP_RR'
+    req_rsp_size: '32,1024'
+
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  host:
+    name: "host.touchstone_tc083"
+    public_ip_attr: "server1_private_ip"
+    private_ip_attr: "server1_private_ip"
+  {% else %}
+  host: host.touchstone_tc083
+  {% endif %}
+
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  target:
+    name: "target.touchstone_tc083"
+    public_ip_attr: "server2_private_ip"
+    private_ip_attr: "server2_private_ip"
+  {% else %}
+  target: target.touchstone_tc083
+  {% endif %}
+
+  runner:
+    type: Duration
+    duration: {{ DURATION }}
+    interval: {{ INTERVAL }}
+  sla:
+    mean_latency: {{ TC083_MEAN_LATENCY }}
+    action: monitor
+
+context:
+  name: touchstone_tc083
+  user: ubuntu
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  heat_template: boot_with_existing_nic_and_vol.yaml
+  heat_parameters:
+    image: {{ IMAGE_NAME }}
+    key_name: yardstick-key
+    flavor: {{ FLAVOR_NAME }}
+    nic_id: {{ FIXED_NET_ID }}
+    subnet_id: {{ FIXED_SUBNET_ID }}
+    server_1_name: host.touchstone_tc083
+    server_2_name: target.touchstone_tc083
+  {% else %}
+
+  image: {{ IMAGE_NAME }}
+  flavor: {{ FLAVOR_NAME }}
+
+  placement_groups:
+    pgrp1:
+      policy: "availability"
+
+  servers:
+    host:
+      floating_ip: true
+      placement: "pgrp1"
+    target:
+      floating_ip: true
+      placement: "pgrp1"
+      different_host: "host.touchstone_tc083"
+
+  networks:
+    test:
+      cidr: '10.0.1.0/24'
+      {% if provider == "vlan" %}
+      provider: {{provider}}
+      physical_network: {{physical_network}}
+        {% if segmentation_id %}
+      segmentation_id: {{segmentation_id}}
+        {% endif %}
+      {% endif %}
+  {% endif %}

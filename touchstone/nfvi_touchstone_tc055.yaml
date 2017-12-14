@@ -15,7 +15,6 @@ description: >
 scenarios:
 -
   type: ComputeCapacity
-  options:
 
   nodes:
     host: compute_node.LF

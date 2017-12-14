@@ -16,6 +16,7 @@ import os
 import uuid
 import errno
 from collections import OrderedDict
+from oslo_utils import encodeutils
 
 import ipaddress
 import pkg_resources
@@ -53,7 +54,7 @@ class HeatContext(Context):
         self.name = None
         self.stack = None
         self.networks = OrderedDict()
-        self.heat_timeout = None
+        self.heat_timeout = DEFAULT_HEAT_TIMEOUT
         self.servers = []
         self.placement_groups = []
         self.server_groups = []
@@ -71,7 +72,7 @@ class HeatContext(Context):
         # generate an uuid to identify yardstick_key
         # the first 8 digits of the uuid will be used
         self.key_uuid = uuid.uuid4()
-        self.heat_timeout = None
+        self.heat_timeout = DEFAULT_HEAT_TIMEOUT
         self.key_filename = ''.join(
             [consts.YARDSTICK_ROOT_PATH, 'yardstick/resources/files/yardstick_key-',
              get_short_key_uuid(self.key_uuid)])
@@ -101,12 +102,18 @@ class HeatContext(Context):
 
         self._user = attrs.get("user")
 
+        self.keypair_name = h_join(self.name, "key")
+        SSH.gen_keys(self.key_filename)
+
         self.template_file = attrs.get("heat_template")
         if self.template_file:
             self.heat_parameters = attrs.get("heat_parameters")
+            # Add generated key to the heat_parameters
+            self.heat_parameters["key_name"] = self.keypair_name
+            self.heat_parameters["public_key"] = encodeutils.safe_decode(
+                    pkg_resources.resource_string('yardstick.resources', 'files/yardstick_key-' + get_short_key_uuid(self.key_uuid) + '.pub'), 'utf-8')
             return
 
-        self.keypair_name = h_join(self.name, "key")
         self.secgroup_name = h_join(self.name, "secgroup")
 
         self._image = attrs.get("image")
@@ -137,7 +144,6 @@ class HeatContext(Context):
             self._server_map[server.dn] = server
 
         self.attrs = attrs
-        SSH.gen_keys(self.key_filename)
 
     def check_environment(self):
         try:
