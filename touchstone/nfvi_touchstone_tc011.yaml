@@ -7,13 +7,20 @@ schema: "yardstick:task:0.1"
 {% set FIXED_SUBNET_ID = FIXED_SUBNET_ID or false %}
 {% set IMAGE_NAME = IMAGE_NAME or 'touchstone-server' %}
 {% set FLAVOR_NAME = FLAVOR_NAME or 'touchstone-flavor' %}
+{% set protocol = protocol or "udp" %}
+{% set bandwidth = bandwidth or "20m" %}
+{% set length = length or "8K" %}
+{% set window = window or 29200 %}
+{% set DURATION = DURATION or 30 %}
 
 scenarios:
 -
   type: Iperf3
   options:
-    udp: udp
-    bandwidth: 20m
+    protocol: {{ protocol }}
+    bandwidth: {{ bandwidth }}
+    length: {{ length }}
+    window: {{ window }}
   {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
   host:
     name: "host.touchstone_tc011"
@@ -34,11 +41,11 @@ scenarios:
 
   runner:
     type: Duration
-    duration: 30
+    duration: {{ DURATION }}
 
   {% if TC011_JITTER %}
   sla:
-    jitter: {{TC011_JITTER}}
+    jitter: {{ TC011_JITTER }}
     action: monitor
   {% endif %}
 
@@ -48,16 +55,16 @@ context:
   {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
   heat_template: boot_with_existing_nic_and_vol.yaml
   heat_parameters:
-    image: {{IMAGE_NAME}}
+    image: {{ IMAGE_NAME }}
     key_name: yardstick-key
-    flavor: {{FLAVOR_NAME}}
-    nic_id: {{FIXED_NET_ID}}
-    subnet_id: {{FIXED_SUBNET_ID}}
+    flavor: {{ FLAVOR_NAME }}
+    nic_id: {{ FIXED_NET_ID }}
+    subnet_id: {{ FIXED_SUBNET_ID }}
     server_1_name: host.touchstone_tc011
     server_2_name: target.touchstone_tc011
   {% else %}
-  image: {{IMAGE_NAME}}
-  flavor: {{FLAVOR_NAME}}
+  image: {{ IMAGE_NAME }}
+  flavor: {{ FLAVOR_NAME }}
 
   placement_groups:
     pgrp1:
