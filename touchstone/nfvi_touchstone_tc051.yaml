@@ -1,0 +1,102 @@
+---
+
+schema: "yardstick:task:0.1"
+description: >
+    Test case for TC051 :OpenStack Controller Node CPU Overload High Availability;
+    This test case is written by new scenario-based HA testing framework.
+
+{% set file = file or 'pod.yaml' %}
+{% set MONITOR_TIME = MONITOR_TIME or 10 %}
+{% set OUTAGE_TIME = OUTAGE_TIME or 5 %}
+
+scenarios:
+  -
+    type: "GeneralHA"
+    options:
+      attackers:
+        -
+          fault_type: "general-attacker"
+          host: controller_node
+          key: "stress-cpu"
+          attack_key: "stress-cpu"
+
+      monitors:
+        -
+          monitor_type: "openstack-cmd"
+          key: "nova-image-list"
+          command_name: "openstack image list"
+          monitor_time: {{MONITOR_TIME}}
+          monitor_number: 3
+          sla:
+            max_outage_time: {{OUTAGE_TIME}}
+
+        -
+          monitor_type: "openstack-cmd"
+          key: "neutron-router-list"
+          command_name: "openstack router list"
+          monitor_time: {{MONITOR_TIME}}
+          monitor_number: 3
+          sla:
+            max_outage_time: {{OUTAGE_TIME}}
+
+        -
+          monitor_type: "openstack-cmd"
+          key: "heat-stack-list"
+          command_name: "openstack stack list"
+          monitor_time: {{MONITOR_TIME}}
+          monitor_number: 3
+          sla:
+            max_outage_time: {{OUTAGE_TIME}}
+
+        -
+          monitor_type: "openstack-cmd"
+          key: "cinder-list"
+          command_name: "openstack volume list"
+          monitor_time: {{MONITOR_TIME}}
+          monitor_number: 3
+          sla:
+            max_outage_time: {{OUTAGE_TIME}}
+
+
+      steps:
+        -
+          actionKey: "stress-cpu"
+          actionType: "attacker"
+          index: 1
+
+        -
+          actionKey: "nova-image-list"
+          actionType: "monitor"
+          index: 2
+
+        -
+          actionKey: "neutron-router-list"
+          actionType: "monitor"
+          index: 3
+
+        -
+          actionKey: "heat-stack-list"
+          actionType: "monitor"
+          index: 4
+
+        -
+          actionKey: "cinder-list"
+          actionType: "monitor"
+          index: 5
+
+
+    nodes:
+      controller_node: controller_node.LF
+    runner:
+      type: Duration
+      duration: 1
+    {% if TC051_MAX_OUTAGE_TIME %}
+    sla:
+      max_outage_time: {{ TC051_MAX_OUTAGE_TIME }}
+      action: monitor
+    {% endif %}
+
+context:
+  type: Node
+  name: LF
+  file: {{file}}

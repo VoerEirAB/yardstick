@@ -1,0 +1,72 @@
+---
+# Yardstick TC014 config file
+# Measure Processing speed using unixbench
+
+schema: "yardstick:task:0.1"
+{% set FIXED_NET_ID = FIXED_NET_ID or false %}
+{% set FIXED_SUBNET_ID = FIXED_SUBNET_ID or false %}
+{% set IMAGE_NAME = IMAGE_NAME or 'touchstone-server' %}
+{% set FLAVOR_NAME = FLAVOR_NAME or 'touchstone-flavor' %}
+{% set AVAILABILITY_ZONE = AVAILABILITY_ZONE or false %}
+{% set test_type = test_type or 'dhry2reg' %}
+{% set TC014_SINGLE_SCORE = TC014_SINGLE_SCORE or false %}
+{% set TC014_PARALLEL_SCORE = TC014_PARALLEL_SCORE or false %}
+
+scenarios:
+-
+  type: UnixBench
+  options:
+    run_mode: 'verbose'
+    test_type: '{{test_type}}'
+
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  host:
+    name: "host.touchstone_tc014"
+    public_ip_attr: "server1_private_ip"
+  {% else %}
+  host: host.touchstone_tc014
+  {% endif %}
+
+  runner:
+    type: Iteration
+    iterations: 1
+    interval: 1
+
+  {% if TC014_SINGLE_SCORE or TC014_PARALLEL_SCORE  %}
+  sla:
+    {% if TC014_SINGLE_SCORE %}
+    single_score: {{TC014_SINGLE_SCORE}}
+    {% endif %}
+    {% if TC014_PARALLEL_SCORE %}
+    parallel_score: {{TC014_PARALLEL_SCORE}}
+    {% endif %}
+    action: monitor
+  {% endif %}
+
+context:
+  name: touchstone_tc014
+  user: ubuntu
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  heat_template: boot_vm_with_existing_nic.yaml
+  heat_parameters:
+    image: {{IMAGE_NAME}}
+    key_name: yardstick-key
+    flavor: {{FLAVOR_NAME}}
+    nic_id: {{FIXED_NET_ID}}
+    subnet_id: {{FIXED_SUBNET_ID}}
+    server_1_name: host.touchstone_tc014
+  {% else %}
+  image: {{IMAGE_NAME}}
+  flavor: {{FLAVOR_NAME}}
+
+  servers:
+    host:
+      floating_ip: true
+      {% if AVAILABILITY_ZONE %}
+      availability_zone: {{AVAILABILITY_ZONE}}
+      {% endif %}
+
+  networks:
+    test:
+      cidr: '10.0.1.0/24'
+  {% endif %}

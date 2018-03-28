@@ -1,0 +1,153 @@
+---
+# Yardstick TC038 config file
+# Measure network throughput and packet loss using pktgen.
+# Different amounts of flows are tested with, from 2 up to 1001000.
+# All tests are run 10 times each. First 10 times with the least
+# amount of ports, then 10 times with the next amount of ports,
+# and so on until all packet sizes have been run with.
+#
+# During the measurements system load and network latency are
+# recorded/measured using ping and mpstat, respectively.
+
+schema: "yardstick:task:0.1"
+{% set FIXED_NET_ID = FIXED_NET_ID or false %}
+{% set FIXED_SUBNET_ID = FIXED_SUBNET_ID or false %}
+{% set IMAGE_NAME = IMAGE_NAME or 'touchstone-server' %}
+{% set FLAVOR_NAME = FLAVOR_NAME or 'touchstone-flavor' %}
+{% set AVAILABILITY_ZONE = AVAILABILITY_ZONE or false %}
+
+scenarios:
+-
+  type: CPUload
+  run_in_background: true
+
+  options:
+    interval: 1
+
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  host:
+    name: "host.touchstone_tc038"
+    public_ip_attr: "server1_private_ip"
+  {% else %}
+  host: host.touchstone_tc038
+  {% endif %}
+-
+  type: CPUload
+  run_in_background: true
+
+  options:
+    interval: 1
+
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  host:
+    name: "target.touchstone_tc038"
+    public_ip_attr: "server2_private_ip"
+  {% else %}
+  host: target.touchstone_tc038
+  {% endif %}
+-
+  type: Ping
+  run_in_background: true
+
+  options:
+    packetsize: 100
+
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  host:
+    name: "host.touchstone_tc038"
+    public_ip_attr: "server1_private_ip"
+  {% else %}
+  host: host.touchstone_tc038
+  {% endif %}
+
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  target:
+    name: "target.touchstone_tc038"
+    private_ip_attr: "server2_private_ip"
+    public_ip_attr: "server2_private_ip"
+  {% else %}
+  target: target.touchstone_tc038
+  {% endif %}
+
+  sla:
+    max_rtt: 10
+
+{% set number_of_ports = number_of_ports or [1, 10, 50, 100, 300, 500, 750, 1000] %}
+{% for num_ports in number_of_ports %}
+-
+  type: Pktgen
+  options:
+    packetsize: 64
+    number_of_ports: {{num_ports}}
+    duration: 20
+
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  host:
+    name: "host.touchstone_tc038"
+    public_ip_attr: "server1_private_ip"
+  {% else %}
+  host: host.touchstone_tc038
+  {% endif %}
+
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  target:
+    name: "target.touchstone_tc038"
+    private_ip_attr: "server2_private_ip"
+    public_ip_attr: "server2_private_ip"
+  {% else %}
+  target: target.touchstone_tc038
+  {% endif %}
+
+  runner:
+    type: Iteration
+    iterations: 10
+    interval: 1
+
+  {% if TC038_MAX_PPM %}
+  sla:
+    max_ppm: {{TC038_MAX_PPM}}
+    action: monitor
+  {% endif %}
+
+{% endfor %}
+
+context:
+  name: touchstone_tc038
+  user: ubuntu
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  heat_template: boot_with_existing_nic_and_vol.yaml
+  heat_parameters:
+    image: {{IMAGE_NAME}}
+    key_name: yardstick-key
+    flavor: {{FLAVOR_NAME}}
+    nic_id: {{FIXED_NET_ID}}
+    subnet_id: {{FIXED_SUBNET_ID}}
+    server_1_name: host.touchstone_tc038
+    server_2_name: target.touchstone_tc038
+  {% else %}
+  image: {{IMAGE_NAME}}
+  flavor: {{FLAVOR_NAME}}
+
+  placement_groups:
+    pgrp1:
+      policy: "availability"
+
+  servers:
+    host:
+      floating_ip: true
+      placement: "pgrp1"
+      {% if AVAILABILITY_ZONE %}
+      availability_zone: {{AVAILABILITY_ZONE}}
+      {% endif %}
+    target:
+      floating_ip: true
+      placement: "pgrp1"
+      {% if AVAILABILITY_ZONE %}
+      availability_zone: {{AVAILABILITY_ZONE}}
+      {% endif %}
+      different_host: "host.touchstone_tc038"
+
+  networks:
+    test:
+      cidr: '10.0.1.0/24'
+  {% endif %}

@@ -1,0 +1,76 @@
+---
+
+schema: "yardstick:task:0.1"
+{% set FIXED_NET_ID = FIXED_NET_ID or false %}
+{% set FIXED_SUBNET_ID = FIXED_SUBNET_ID or false %}
+{% set AVAILABILITY_ZONE = AVAILABILITY_ZONE or false %}
+
+description: >
+    Yardstick TC079 config file;
+    measure storage and file system performance using bonnie++;
+
+{% set provider = provider or none %}
+{% set physical_network = physical_network or 'physnet1' %}
+{% set segmentation_id = segmentation_id or none %}
+
+{% set FILE_SIZE = FILE_SIZE or 1024 %}
+{% set RAM_SIZE = RAM_SIZE or 512 %}
+{% set CONCURRENCY = CONCURRENCY or 1 %}
+{% set ITERATIONS = ITERATIONS or 1 %}
+
+scenarios:
+-
+  type: Bonnie++
+  options:
+    file_size: {{ FILE_SIZE }}
+    ram_size: {{ RAM_SIZE }}
+    test_dir: /tmp
+    concurrency: {{ CONCURRENCY }}
+
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  host:
+    name: host.touchstone_tc079
+    public_ip_attr: "server1_private_ip"
+    private_ip_attr: "server1_private_ip"
+  {% else %}
+  host: host.touchstone_tc079
+  {% endif %}
+
+  runner:
+    type: Iteration
+    iterations: {{ ITERATIONS }}
+
+context:
+  name: touchstone_tc079
+  user: ubuntu
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  heat_template: boot_vm_with_existing_nic.yaml
+  heat_parameters:
+    image: {{IMAGE_NAME}}
+    key_name: yardstick-key
+    flavor: {{FLAVOR_NAME}}
+    nic_id: {{FIXED_NET_ID}}
+    subnet_id: {{FIXED_SUBNET_ID}}
+    server_1_name: host.touchstone_tc079
+  {% else %}
+  image: {{ IMAGE_NAME }}
+  flavor: {{ FLAVOR_NAME }}
+
+  servers:
+    host:
+      floating_ip: true
+      {% if AVAILABILITY_ZONE %}
+      availability_zone: {{AVAILABILITY_ZONE}}
+      {% endif %}
+
+  networks:
+    test:
+      cidr: '10.0.1.0/24'
+      {% if provider == "vlan" %}
+      provider: {{provider}}
+      physical_network: {{physical_network}}
+        {% if segmentation_id %}
+      segmentation_id: {{segmentation_id}}
+        {% endif %}
+      {% endif %}
+  {% endif %}

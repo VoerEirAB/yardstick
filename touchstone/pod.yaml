@@ -1,0 +1,40 @@
+---
+nodes:
+  {% if CONTROLLER_IP and CONTROLLER_USER %}
+  -
+    name: controller_node
+    role: Controller
+    ip: {{ CONTROLLER_IP }}
+    user: {{ CONTROLLER_USER }}
+    key_filename: /root/.ssh/id_rsa
+  {% endif %}
+
+  {% if COMPUTE_IP and COMPUTE_USER %}
+  -
+    name: compute_node
+    role: Compute
+    ip : {{ COMPUTE_IP }}
+    user : {{ COMPUTE_USER }}
+    key_filename: /root/.ssh/id_rsa
+  {% endif %}
+
+  {% if HOST_IP and COMPUTE_USER %}
+  -
+    name: host_compute_node
+    role: Compute
+    ip : {{ HOST_IP }}
+    user : {{ COMPUTE_USER }}
+    key_filename: /root/.ssh/id_rsa
+  {% endif %}
+
+  {% if TARGET_IP and COMPUTE_USER %}
+  -
+    name: target_compute_node
+    role: Compute
+    ip : {{ TARGET_IP }}
+    user : {{ COMPUTE_USER }}
+    key_filename: /root/.ssh/id_rsa
+  {% endif %}
+  -
+    name: bm1
+    role: Baremetal

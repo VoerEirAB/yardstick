@@ -1,0 +1,93 @@
+---
+# Yardstick TC011 config file
+# Measure packet delay variation (jitter) using iperf3
+
+schema: "yardstick:task:0.1"
+{% set FIXED_NET_ID = FIXED_NET_ID or false %}
+{% set FIXED_SUBNET_ID = FIXED_SUBNET_ID or false %}
+{% set IMAGE_NAME = IMAGE_NAME or 'touchstone-server' %}
+{% set FLAVOR_NAME = FLAVOR_NAME or 'touchstone-flavor' %}
+{% set AVAILABILITY_ZONE = AVAILABILITY_ZONE or false %}
+{% set protocol = protocol or "udp" %}
+{% set bandwidth = bandwidth or "20m" %}
+{% set length = length or "8K" %}
+{% set window = window or 29200 %}
+{% set DURATION = DURATION or 30 %}
+
+scenarios:
+-
+  type: Iperf3
+  options:
+    protocol: {{ protocol }}
+    bandwidth: {{ bandwidth }}
+    length: {{ length }}
+    window: {{ window }}
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  host:
+    name: "host.touchstone_tc011"
+    public_ip_attr: "server1_private_ip"
+    private_ip_attr: "server1_private_ip"
+  {% else %}
+  host: host.touchstone_tc011
+  {% endif %}
+
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  target:
+    name: "target.touchstone_tc011"
+    private_ip_attr: "server2_private_ip"
+    public_ip_attr: "server2_private_ip"
+  {% else %}
+  target: target.touchstone_tc011
+  {% endif %}
+
+  runner:
+    type: Duration
+    duration: {{ DURATION }}
+
+  {% if TC011_JITTER %}
+  sla:
+    jitter: {{ TC011_JITTER }}
+    action: monitor
+  {% endif %}
+
+context:
+  name: touchstone_tc011
+  user: ubuntu
+  {% if AVAILABILITY_ZONE %}
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  heat_template: boot_with_existing_nic_and_vol.yaml
+  heat_parameters:
+    image: {{ IMAGE_NAME }}
+    key_name: yardstick-key
+    flavor: {{ FLAVOR_NAME }}
+    nic_id: {{ FIXED_NET_ID }}
+    subnet_id: {{ FIXED_SUBNET_ID }}
+    server_1_name: host.touchstone_tc011
+    server_2_name: target.touchstone_tc011
+  {% else %}
+  image: {{ IMAGE_NAME }}
+  flavor: {{ FLAVOR_NAME }}
+
+  placement_groups:
+    pgrp1:
+      policy: "availability"
+
+  servers:
+    host:
+      floating_ip: true
+      placement: "pgrp1"
+      {% if AVAILABILITY_ZONE %}
+      availability_zone: {{AVAILABILITY_ZONE}}
+      {% endif %}
+    target:
+      floating_ip: true
+      placement: "pgrp1"
+      {% if AVAILABILITY_ZONE %}
+      availability_zone: {{AVAILABILITY_ZONE}}
+      {% endif %}
+      different_host: "host.touchstone_tc011"
+
+  networks:
+    test:
+      cidr: '10.0.1.0/24'
+  {% endif %}
