@@ -1,0 +1,52 @@
+---
+
+schema: "yardstick:task:0.1"
+description: >
+    Test case for TC048 :Control node Openstack service down - cinder api.
+
+{% set file = file or 'pod.yaml' %}
+{% set MONITOR_TIME = MONITOR_TIME or 10 %}
+{% set RECOVERY_TIME = RECOVERY_TIME or 20 %}
+{% set OUTAGE_TIME = OUTAGE_TIME or 5 %}
+
+scenarios:
+-
+  type: ServiceHA
+  options:
+    attackers:
+    - fault_type: "kill-process"
+      process_name: "cinder-api"
+      host: controller_node
+
+    monitors:
+    - monitor_type: "openstack-cmd"
+      command_name: "openstack volume list"
+      monitor_time: {{MONITOR_TIME}}
+      monitor_number: 3
+      sla:
+        max_outage_time: {{OUTAGE_TIME}}
+    - monitor_type: "process"
+      process_name: "cinder-api"
+      host: controller_node
+      monitor_time: {{MONITOR_TIME}}
+      monitor_number: 3
+      sla:
+        max_recover_time: {{RECOVERY_TIME}}
+
+  nodes:
+    controller_node: controller_node.LF
+
+  runner:
+    type: Duration
+    duration: 1
+  {% if TC048_MAX_OUTAGE_TIME %}
+  sla:
+    max_outage_time: {{ TC048_MAX_OUTAGE_TIME }}
+    action: monitor
+  {% endif %}
+
+context:
+  type: Node
+  name: LF
+  file: {{file}}
+

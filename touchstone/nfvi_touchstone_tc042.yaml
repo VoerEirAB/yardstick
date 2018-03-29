@@ -1,0 +1,94 @@
+---
+# Yardstick TC042 config file
+# Measure network latency using testpmd and pktgen-dpdk
+
+schema: "yardstick:task:0.1"
+{% set FIXED_NET_ID = FIXED_NET_ID or false %}
+{% set FIXED_SUBNET_ID = FIXED_SUBNET_ID or false %}
+{% set number_of_ports = number_of_ports or [1, 10, 50, 100, 500, 1000] %}
+{% set packet_sizes = packet_sizes or [64, 128, 256, 512, 1024, 1280, 1518] %}
+{% set IMAGE_NAME = IMAGE_NAME or 'touchstone-server' %}
+{% set FLAVOR_NAME = FLAVOR_NAME or 'touchstone-flavor' %}
+{% set AVAILABILITY_ZONE = AVAILABILITY_ZONE or false %}
+
+scenarios:
+{% for pkt_size in packet_sizes %}
+-
+  type: PktgenDPDKLatency
+  options:
+    packetsize: {{pkt_size}}
+    rate: 100
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  host:
+    name: "host.touchstone_tc042"
+    public_ip_attr: "server1_private_ip"
+    private_ip_attr: "server1_private_ip"
+  {% else %}
+  host: host.touchstone_tc042
+  {% endif %}
+
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  target:
+    name: "target.touchstone_tc042"
+    private_ip_attr: "server2_private_ip"
+    public_ip_attr: "server2_private_ip"
+  {% else %}
+  target: target.touchstone_tc042
+  {% endif %}
+
+  runner:
+    type: Iteration
+    iterations: 1
+    interval: 1
+
+  {% if TC042_MAX_LATENCY %}
+  sla:
+    max_latency: {{TC042_MAX_LATENCY}}
+    action: monitor
+  {% endif %}
+{% endfor %}
+
+context:
+  name: touchstone_tc042
+  user: ubuntu
+  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  heat_template: boot_with_existing_nic_and_vol.yaml
+  heat_parameters:
+    image: {{IMAGE_NAME}}-dpdk
+    key_name: yardstick-key
+    flavor: {{FLAVOR_NAME}}
+    nic_id: {{FIXED_NET_ID}}
+    subnet_id: {{FIXED_SUBNET_ID}}
+    server_1_name: host.touchstone_tc042
+    server_2_name: target.touchstone_tc042
+  {% else %}
+  image: {{IMAGE_NAME}}-dpdk
+  flavor: {{FLAVOR_NAME}}
+
+  placement_groups:
+    pgrp1:
+      policy: "availability"
+
+  servers:
+    host:
+      floating_ip: true
+      placement: "pgrp1"
+      {% if AVAILABILITY_ZONE %}
+      availability_zone: {{AVAILABILITY_ZONE}}
+      {% endif %}
+    target:
+      floating_ip: true
+      placement: "pgrp1"
+      {% if AVAILABILITY_ZONE %}
+      availability_zone: {{AVAILABILITY_ZONE}}
+      {% endif %}
+      different_host: "host.touchstone_tc042"
+
+  networks:
+    test:
+      cidr: '10.0.1.0/24'
+    test2:
+      cidr: '10.0.2.0/24'
+    test3:
+      cidr: '10.0.3.0/24'
+  {% endif %}
