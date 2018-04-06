@@ -15,6 +15,7 @@ import logging
 import os
 import errno
 from collections import OrderedDict
+from oslo_utils import encodeutils
 
 import ipaddress
 import pkg_resources
@@ -27,7 +28,7 @@ from yardstick.benchmark.contexts.model import update_scheduler_hints
 from yardstick.common import exceptions as y_exc
 from yardstick.common.openstack_utils import get_shade_client
 from yardstick.orchestrator.heat import HeatStack
-from yardstick.orchestrator.heat import HeatTemplate
+from yardstick.orchestrator.heat import HeatTemplate, get_short_key_uuid
 from yardstick.common import constants as consts
 from yardstick.common import utils
 from yardstick.common.utils import source_env
@@ -52,6 +53,7 @@ class HeatContext(Context):
     __context_type__ = "Heat"
 
     def __init__(self):
+        self.name = None
         self.stack = None
         self.networks = OrderedDict()
         self.heat_timeout = None
@@ -69,7 +71,7 @@ class HeatContext(Context):
         self.template_file = None
         self.heat_parameters = None
         self.shade_client = None
-        self.heat_timeout = None
+        self.heat_timeout = DEFAULT_HEAT_TIMEOUT
         self.key_filename = None
         super(HeatContext, self).__init__()
 
@@ -96,15 +98,22 @@ class HeatContext(Context):
 
         self.check_environment()
         self._user = attrs.get("user")
+        self.keypair_name = h_join(self.name, "key")
+        SSH.gen_keys(self.key_filename)
 
         self.template_file = attrs.get("heat_template")
 
         self.heat_timeout = attrs.get("timeout", DEFAULT_HEAT_TIMEOUT)
         if self.template_file:
             self.heat_parameters = attrs.get("heat_parameters")
+            # Add generated key to the heat_parameters
+            self.heat_parameters["key_name"] = self.keypair_name
+            self.heat_parameters["public_key"] = encodeutils.safe_decode(
+                pkg_resources.resource_string('yardstick.resources',
+                                              'files/yardstick_key-' + get_short_key_uuid(self.key_uuid) + '.pub'),'utf-8')
             return
 
-        self.keypair_name = h_join(self.name, "key")
+        # self.keypair_name = h_join(self.name, "key")
         self.secgroup_name = h_join(self.name, "secgroup")
 
         self._image = attrs.get("image")
