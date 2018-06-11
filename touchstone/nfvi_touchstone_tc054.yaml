@@ -2,14 +2,16 @@
 
 schema: "yardstick:task:0.1"
 description: >
-    Test case for TC054 :OpenStack VIP Master Node abnormally shutdown High Availability;
-    This test case is written by new scenario-based HA testing framework.
+    Yardstick TC054 config file;
+    HA test case: OpenStack VIP Master Node abnormally shutdown High Availability.
 
-{% set file = file or 'pod.yaml' %}
-{% set vip_management = vip_management or '192.168.0.2' %}
-{% set vip_public = vip_public or '172.16.0.3' %}
-{% set vip_router_management = vip_router_management or '192.168.0.1' %}
-{% set vip_router_public = vip_router_public or '172.16.0.2' %}
+{% set jump_host = jump_host or 'node0' %}
+{% set attack_host = attack_host or 'node1' %}
+{% set check_host = check_host or 'node4' %}
+{% set file = file or '/etc/yardstick/pod.yaml' %}
+{% set vip_public = vip_public or '10.1.0.222' %}
+{% set monitor_time = monitor_time or 30 %}
+
 {% set MONITOR_TIME = MONITOR_TIME or 10 %}
 {% set OUTAGE_TIME = OUTAGE_TIME or 5 %}
 
@@ -20,7 +22,7 @@ scenarios:
       attackers:
         -
           fault_type: "bare-metal-down"
-          host: controller_node
+          host: {{attack_host}}
           key: "bare-metal-down"
 
       monitors:
@@ -37,43 +39,19 @@ scenarios:
           monitor_type: "general-monitor"
           monitor_key: "ip-status"
           key: "vip-mgmt-status"
-          host: compute_node
+          host: {{check_host}}
           monitor_time: {{MONITOR_TIME}}
           monitor_number: 3
           sla:
             max_outage_time: {{OUTAGE_TIME}}
           parameter:
-            ip_address: {{vip_management}}
-
-        -
-          monitor_type: "general-monitor"
-          monitor_key: "ip-status"
-          key: "vip-routerp-status"
-          host: compute_node
-          monitor_time: {{MONITOR_TIME}}
-          monitor_number: 3
-          sla:
-            max_outage_time: {{OUTAGE_TIME}}
-          parameter:
-            ip_address: {{vip_router_public}}
-
-        -
-          monitor_type: "general-monitor"
-          monitor_key: "ip-status"
-          key: "vip-router-status"
-          host: compute_node
-          monitor_time: {{MONITOR_TIME}}
-          monitor_number: 3
-          sla:
-            max_outage_time: {{OUTAGE_TIME}}
-          parameter:
-            ip_address: {{vip_router_management}}
+            ip_address: {{vip_public}}
 
         -
           monitor_type: "general-monitor"
           monitor_key: "ip-status"
           key: "vip-pub"
-          host: compute_node
+          host: {{check_host}}
           monitor_time: {{MONITOR_TIME}}
           monitor_number: 3
           sla:
@@ -91,30 +69,15 @@ scenarios:
           actionKey: "list-images"
           actionType: "monitor"
           index: 2
-
-        -
-          actionKey: "vip-mgmt-status"
-          actionType: "monitor"
-          index: 3
-
-        -
-          actionKey: "vip-routerp-status"
-          actionType: "monitor"
-          index: 4
-
-        -
-          actionKey: "vip-router-status"
-          actionType: "monitor"
-          index: 5
-
         -
           actionKey: "vip-pub"
           actionType: "monitor"
           index: 6
 
     nodes:
-      controller_node: controller_node.LF
-      compute_node: compute_node.LF
+      {{jump_host}}: {{jump_host}}.LF
+      {{attack_host}}: {{attack_host}}.LF
+      {{check_host}}: {{check_host}}.LF
     runner:
       type: Duration
       duration: 1

@@ -2,9 +2,14 @@
 
 schema: "yardstick:task:0.1"
 description: >
-    Sample test case for the HA of OpenStack Controll Node abnormally shutdown.
+    Yardstick TC025 config file;
+    HA test case: OpenStack Controll Node abnormally shutdown.
+
 
 {% set file = file or 'pod.yaml' %}
+{% set jump_host = jump_host or 'node0' %}
+{% set attack_host = attack_host or 'node1' %}
+
 {% set MONITOR_TIME = MONITOR_TIME or 10 %}
 {% set OUTAGE_TIME = OUTAGE_TIME or 5 %}
 
@@ -14,8 +19,9 @@ scenarios:
   type: ServiceHA
   options:
     attackers:
-    - fault_type: "host-shutdown"
-      host: controller_node
+    - fault_type: "bare-metal-down"
+      host: {{attack_host}}
+      jump_host: {{jump_host}}
 
     monitors:
     - monitor_type: "openstack-cmd"
@@ -36,7 +42,9 @@ scenarios:
       monitor_number: 3
 
   nodes:
-    controller_node: controller_node.LF
+    {{attack_host}}: {{attack_host}}.LF
+    {{jump_host}}: {{jump_host}}.LF
+
 
   runner:
     type: Iteration

@@ -1,9 +1,16 @@
 ---
-# Sample test case for the HA of controller node Openstack service
 
 schema: "yardstick:task:0.1"
+description: >
+
+    Yardstick TC019 config file;
+    HA test case: HA test case: Control node Openstack service down - nova-api.
+
 
 {% set file = file or 'pod.yaml' %}
+{% set attack_host = attack_host or "controller_node" %}
+{% set attack_process = attack_process or "nova-api" %}
+
 {% set TC019_MAX_OUTAGE_TIME = TC019_MAX_OUTAGE_TIME or 5 %}
 {% set TC019_MAX_RECOVERY_TIME = TC019_MAX_RECOVERY_TIME or 5 %}
 {% set WAIT_TIME = WAIT_TIME or 10 %}
@@ -16,8 +23,8 @@ scenarios:
   options:
     attackers:
     - fault_type: "kill-process"
-      process_name: "nova-api"
-      host: controller_node
+      process_name: "{{ attack_process }}"
+      host: {{attack_host}}
 
     wait_time: {{WAIT_TIME}}
     monitors:
@@ -27,14 +34,14 @@ scenarios:
       sla:
         max_outage_time: {{TC019_MAX_OUTAGE_TIME}}
     - monitor_type: "process"
-      process_name: "nova-api"
+      process_name: "{{ attack_process }}"
       monitor_time: {{MONITOR_TIME_RECOVERY}}
       sla:
         max_recover_time: {{TC019_MAX_RECOVERY_TIME}}
       host: controller_node
 
   nodes:
-    controller_node: controller_node.LF
+    {{attack_host}}: {{attack_host}}.LF
 
   runner:
     type: Iteration
