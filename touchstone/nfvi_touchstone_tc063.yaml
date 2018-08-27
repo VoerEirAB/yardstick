@@ -6,12 +6,19 @@ description: >
     Measure disk size, block size and disk utilization using fdisk and iostat.
 
 {% set file = file or 'pod.yaml' %}
+{% set test_type = test_type  or 'disk_size' %}
+{% set count = count  or 15 %}
+{% set interval = interval  or 1 %}
 
 scenarios:
 -
   type: StorageCapacity
   options:
-    test_type: "disk_size"
+    test_type: {{test_type}}
+    {% if test_type == 'disk_utilization' %}
+    count: {{count}}
+    interval: {{interval}}
+    {% endif %}
 
   host: compute_node.LF
 
