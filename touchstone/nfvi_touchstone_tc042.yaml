@@ -11,6 +11,9 @@ schema: "yardstick:task:0.1"
 {% set FLAVOR_NAME = FLAVOR_NAME or 'touchstone-flavor' %}
 {% set AVAILABILITY_ZONE = AVAILABILITY_ZONE or false %}
 
+# setting SLA
+{% set TC042_MAX_LATENCY = TC042_MAX_LATENCY or false %}
+
 scenarios:
 {% for pkt_size in packet_sizes %}
 -

@@ -26,6 +26,10 @@ description: >
 {% set INTERVAL = INTERVAL or 1 %}
 {% set TC083_MEAN_LATENCY = TC083_MEAN_LATENCY or 100 %}
 
+# setting SLA
+{% set TC083_MEAN_LATENCY = TC083_MEAN_LATENCY or false %}
+
+
 scenarios:
 -
   type: Netperf
@@ -56,9 +60,11 @@ scenarios:
     type: Iteration
     iterations: {{ ITERATIONS }}
     interval: {{ INTERVAL }}
+  {% if TC083_MEAN_LATENCY %}
   sla:
     mean_latency: {{ TC083_MEAN_LATENCY }}
     action: monitor
+  {% endif %}
 -
   type: Netperf
   options:
@@ -87,9 +93,11 @@ scenarios:
     type: Duration
     duration: {{ DURATION }}
     interval: {{ INTERVAL }}
+  {% if TC083_MEAN_LATENCY %}
   sla:
     mean_latency: {{ TC083_MEAN_LATENCY }}
     action: monitor
+  {% endif %}
 
 context:
   name: touchstone_tc083

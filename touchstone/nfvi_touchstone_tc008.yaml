@@ -18,6 +18,10 @@ schema: "yardstick:task:0.1"
 {% set FLAVOR_NAME = FLAVOR_NAME or 'touchstone-flavor' %}
 {% set AVAILABILITY_ZONE = AVAILABILITY_ZONE or false %}
 
+# setting SLA
+{% set TC008_MAX_PPM = TC008_MAX_PPM or false %}
+
+
 scenarios:
 {% for pkt_size in packet_sizes %}
   {% for num_ports in number_of_ports %}
