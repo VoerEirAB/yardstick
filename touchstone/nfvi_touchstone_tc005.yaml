@@ -11,6 +11,13 @@ schema: "yardstick:task:0.1"
 {% set FLAVOR_NAME = FLAVOR_NAME or 'touchstone-flavor' %}
 {% set AVAILABILITY_ZONE = AVAILABILITY_ZONE or false %}
 
+# setting SLA
+{% set TC005_READ_BW = TC005_READ_BW or false %}
+{% set TC005_READ_IOPS = TC005_READ_IOPS or false %}
+{% set TC005_READ_LAT = TC005_READ_LAT or false %}
+{% set TC005_WRITE_BW = TC005_WRITE_BW or false %}
+{% set TC005_WRITE_IOPS = TC005_WRITE_IOPS or false %}
+{% set TC005_WRITE_IOPS = TC005_WRITE_IOPS or false %}
 
 scenarios:
 {% for rw in rw_scenarios %}

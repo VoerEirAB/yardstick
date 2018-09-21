@@ -8,6 +8,8 @@ description: >
 {% set MONITOR_TIME = MONITOR_TIME or 10 %}
 {% set OUTAGE_TIME = OUTAGE_TIME or 5 %}
 
+# setting SLA
+{% set TC025_MAX_OUTAGE_TIME = TC025_MAX_OUTAGE_TIME or false %}
 
 scenarios:
 -

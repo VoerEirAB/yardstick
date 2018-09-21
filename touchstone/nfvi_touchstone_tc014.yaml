@@ -9,6 +9,8 @@ schema: "yardstick:task:0.1"
 {% set FLAVOR_NAME = FLAVOR_NAME or 'touchstone-flavor' %}
 {% set AVAILABILITY_ZONE = AVAILABILITY_ZONE or false %}
 {% set test_type = test_type or 'dhry2reg' %}
+
+# setting SLA
 {% set TC014_SINGLE_SCORE = TC014_SINGLE_SCORE or false %}
 {% set TC014_PARALLEL_SCORE = TC014_PARALLEL_SCORE or false %}
 

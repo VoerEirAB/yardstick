@@ -10,6 +10,9 @@ schema: "yardstick:task:0.1"
 {% set MONITOR_TIME_OUTAGE = MONITOR_TIME_OUTAGE or 10 %}
 {% set MONITOR_TIME_RECOVERY = MONITOR_TIME_RECOVERY or 20 %}
 
+# setting SLA
+{% set TC019_OUTAGE_TIME = TC019_OUTAGE_TIME or false %}
+
 scenarios:
 -
   type: ServiceHA

@@ -9,6 +9,9 @@ description: >
 {% set RECOVERY_TIME = RECOVERY_TIME or 20 %}
 {% set OUTAGE_TIME = OUTAGE_TIME or 5 %}
 
+# setting SLA
+{% set TC048_MAX_OUTAGE_TIME = TC048_MAX_OUTAGE_TIME or false %}
+
 scenarios:
 -
   type: ServiceHA

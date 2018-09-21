@@ -7,6 +7,10 @@ description: >
 
 {% set PACKET_SIZE = PACKET_SIZE or 100 %}
 {% set file = file or 'pod.yaml' %}
+
+# setting SLA
+{% set TC043_MAX_RTT = TC043_MAX_RTT or false %}
+
 scenarios:
 -
   type: Ping

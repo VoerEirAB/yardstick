@@ -16,6 +16,9 @@ schema: "yardstick:task:0.1"
 {% set FLAVOR_NAME = FLAVOR_NAME or 'touchstone-flavor' %}
 {% set AVAILABILITY_ZONE = AVAILABILITY_ZONE or false %}
 
+# setting SLA
+{% set TC037_MAX_PPM = TC037_MAX_PPM or false %}
+
 scenarios:
 -
   type: CPUload

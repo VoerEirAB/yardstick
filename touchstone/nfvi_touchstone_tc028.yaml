@@ -10,6 +10,11 @@ schema: "yardstick:task:0.1"
 {% set histogram = histogram or 90 %}
 {% set file = file or 'pod.yaml' %}
 
+# setting SLA
+{% set TC028_MIN_KVM_LATENCY = TC028_MIN_KVM_LATENCY or false %}
+{% set TC028_AVG_KVM_LATENCY = TC028_AVG_KVM_LATENCY or false %}
+{% set TC028_MAX_KVM_LATENCY = TC028_MAX_KVM_LATENCY or false %}
+
 scenarios:
 -
   type: Cyclictest

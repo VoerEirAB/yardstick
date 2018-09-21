@@ -16,6 +16,10 @@ schema: "yardstick:task:0.1"
 {% set FLAVOR_NAME = FLAVOR_NAME or 'touchstone-flavor' %}
 {% set AVAILABILITY_ZONE = AVAILABILITY_ZONE or false %}
 
+# setting SLA
+{% set TC072_MAX_RTT = TC072_MAX_RTT or false %}
+
+
 scenarios:
 -
   type: NetUtilization
