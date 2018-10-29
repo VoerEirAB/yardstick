@@ -9,7 +9,7 @@ description: >
 {% set external_net = EXTERNAL_NETWORK or 'br-ex' %}
 {% set management_net = management_net or 'br-mgmt' %}
 {% set storage_net = storage_net or 'br-storage' %}
-{% set internal_net = FIXED_NET_NAME or 'br-mesh' %}
+{% set internal_net = SSH_NET_NAME or 'br-mesh' %}
 {% set MONITOR_TIME = MONITOR_TIME or 10 %}
 {% set OUTAGE_TIME = OUTAGE_TIME or 5 %}
 
