@@ -3,8 +3,8 @@
 # Reading cache hit/miss ratio and usage statistics
 
 schema: "yardstick:task:0.1"
-{% set FIXED_NET_ID = FIXED_NET_ID or false %}
-{% set FIXED_SUBNET_ID = FIXED_SUBNET_ID or false %}
+{% set EXTERNAL_NETWORK = EXTERNAL_NETWORK or false %}
+{% set FLOATING_IP_CREATION_SUPPORT = FLOATING_IP_CREATION_SUPPORT or false %}
 {% set IMAGE_NAME = IMAGE_NAME or 'touchstone-server' %}
 {% set FLAVOR_NAME = FLAVOR_NAME or 'touchstone-flavor' %}
 {% set AVAILABILITY_ZONE = AVAILABILITY_ZONE or false %}
@@ -14,7 +14,7 @@ scenarios:
   type: CACHEstat
   options:
     interval: 1
-  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  {% if not FLOATING_IP_CREATION_SUPPORT %}
   host:
     name: "host.touchstone_tc004"
     public_ip_attr: "server1_private_ip"
@@ -30,14 +30,14 @@ scenarios:
 context:
   name: touchstone_tc004
   user: ubuntu
-  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  {% if not FLOATING_IP_CREATION_SUPPORT %}
   heat_template: boot_vm_with_existing_nic.yaml
   heat_parameters:
     image: {{IMAGE_NAME}}
     key_name: yardstick-key
     flavor: {{FLAVOR_NAME}}
-    nic_id: {{FIXED_NET_ID}}
-    subnet_id: {{FIXED_SUBNET_ID}}
+    nic_id: {{SSH_NET_ID}}
+    subnet_id: {{SSH_SUBNET_ID}}
     server_1_name: host.touchstone_tc004
   {% else %}
   image: {{IMAGE_NAME}}

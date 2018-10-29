@@ -17,8 +17,8 @@ description: >
 {% set physical_network = physical_network or 'physnet1' %}
 {% set segmentation_id = segmentation_id or none %}
 
-{% set FIXED_NET_ID = FIXED_NET_ID or false %}
-{% set FIXED_SUBNET_ID = FIXED_SUBNET_ID or false %}
+{% set EXTERNAL_NETWORK = EXTERNAL_NETWORK or false %}
+{% set FLOATING_IP_CREATION_SUPPORT = FLOATING_IP_CREATION_SUPPORT or false %}
 {% set AVAILABILITY_ZONE = AVAILABILITY_ZONE or false %}
 {% set PACKET_SIZE = PACKET_SIZE or 1024%}
 {% set DURATION = DURATION or 20 %}
@@ -38,7 +38,7 @@ scenarios:
     send_msg_size: {{ PACKET_SIZE }}
     duration: {{ DURATION }}
 
-  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  {% if not FLOATING_IP_CREATION_SUPPORT %}
   host:
     name: "host.touchstone_tc083"
     public_ip_attr: "server1_private_ip"
@@ -47,7 +47,7 @@ scenarios:
   host: host.touchstone_tc083
   {% endif %}
 
-  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  {% if not FLOATING_IP_CREATION_SUPPORT %}
   target:
     name: "target.touchstone_tc083"
     public_ip_attr: "server2_private_ip"
@@ -71,7 +71,7 @@ scenarios:
     testname: 'TCP_RR'
     req_rsp_size: '32,1024'
 
-  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  {% if not FLOATING_IP_CREATION_SUPPORT %}
   host:
     name: "host.touchstone_tc083"
     public_ip_attr: "server1_private_ip"
@@ -80,7 +80,7 @@ scenarios:
   host: host.touchstone_tc083
   {% endif %}
 
-  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  {% if not FLOATING_IP_CREATION_SUPPORT %}
   target:
     name: "target.touchstone_tc083"
     public_ip_attr: "server2_private_ip"
@@ -102,14 +102,14 @@ scenarios:
 context:
   name: touchstone_tc083
   user: ubuntu
-  {% if FIXED_NET_ID and FIXED_SUBNET_ID %}
+  {% if not FLOATING_IP_CREATION_SUPPORT %}
   heat_template: boot_with_existing_nic_and_vol.yaml
   heat_parameters:
     image: {{ IMAGE_NAME }}
     key_name: yardstick-key
     flavor: {{ FLAVOR_NAME }}
-    nic_id: {{ FIXED_NET_ID }}
-    subnet_id: {{ FIXED_SUBNET_ID }}
+    nic_id: {{ SSH_NET_ID }}
+    subnet_id: {{ SSH_SUBNET_ID }}
     server_1_name: host.touchstone_tc083
     server_2_name: target.touchstone_tc083
   {% else %}
