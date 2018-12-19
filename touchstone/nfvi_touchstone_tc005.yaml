@@ -17,7 +17,7 @@ schema: "yardstick:task:0.1"
 {% set TC005_READ_LAT = TC005_READ_LAT or false %}
 {% set TC005_WRITE_BW = TC005_WRITE_BW or false %}
 {% set TC005_WRITE_IOPS = TC005_WRITE_IOPS or false %}
-{% set TC005_WRITE_IOPS = TC005_WRITE_IOPS or false %}
+{% set TC005_WRITE_LAT = TC005_WRITE_LAT or false %}
 
 scenarios:
 {% for rw in rw_scenarios %}
