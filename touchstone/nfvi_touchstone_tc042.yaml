@@ -57,7 +57,7 @@ context:
   {% if not FLOATING_IP_CREATION_SUPPORT %}
   heat_template: boot_with_existing_nic_and_vol.yaml
   heat_parameters:
-    image: {{IMAGE_NAME}}-dpdk
+    image: {{IMAGE_NAME}}
     key_name: yardstick-key
     flavor: {{FLAVOR_NAME}}
     nic_id: {{SSH_NET_ID}}
@@ -65,7 +65,7 @@ context:
     server_1_name: host.touchstone_tc042
     server_2_name: target.touchstone_tc042
   {% else %}
-  image: {{IMAGE_NAME}}-dpdk
+  image: {{IMAGE_NAME}}
   flavor: {{FLAVOR_NAME}}
 
   placement_groups:
