@@ -54,10 +54,10 @@ class HeatObject(object):
 
         if self._heat_client is None:
             sess = op_utils.get_session()
-            heat_endpoint = op_utils.get_endpoint(service_type='orchestration')
+            kw = op_utils.get_os_endpoint_type()
             self._heat_client = heatclient.client.Client(
                 op_utils.get_heat_api_version(),
-                endpoint=heat_endpoint, session=sess)
+                session=sess, **kw)
 
         return self._heat_client
 
