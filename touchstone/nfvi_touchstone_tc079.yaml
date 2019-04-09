@@ -1,0 +1,62 @@
+---
+
+schema: "yardstick:task:0.1"
+description: >
+    Yardstick TC079 config file;
+    measure storage and file system performance using bonnie++;
+
+{# -- Unused for touchstone as of now -- #}
+{% set provider = provider or false %}
+{% set physical_network = physical_network or none %}
+{% set segmentation_id = segmentation_id or none %}
+{# -- Unused end -- #}
+
+scenarios:
+-
+  type: Bonnie++
+  options:
+    file_size: {{FILE_SIZE}}
+    ram_size: {{RAM_SIZE}}
+    test_dir: {{TEST_DIR}}
+    concurrency: {{CONCURRENCY}}
+
+  host: "host.touchstone_tc079"
+
+  runner:
+    type: Iteration
+    iterations: 1
+
+context:
+  name: touchstone_tc079
+  user: ubuntu
+
+  servers:
+    host:
+      image: {{HOST_IMAGE}}
+      flavor: {{HOST_FLAVOR}}
+      {% if FLOATING_IP_CREATION_SUPPORT %}
+      floating_ip: true
+      {% endif %}
+      {% if HOST_AVAILABILITY_ZONE %}
+      availability_zone: {{HOST_AVAILABILITY_ZONE}}
+      {% endif %}
+
+  networks:
+    {% if not FLOATING_IP_CREATION_SUPPORT %}
+    {{SSH_NET_NAME}}:
+      subnet: {{SSH_SUBNET_ID}}
+      net_flags:
+        is_existing: true
+      vnic_type: {{VNIC_TYPE}}
+    {% else %}
+    test:
+      cidr: '10.0.1.0/24'
+      vnic_type: {{VNIC_TYPE}}
+      {% if provider == "vlan" or provider == "sriov" %}
+      provider: {{provider}}
+      physical_network: {{physical_network}}
+      {% if segmentation_id %}
+      segmentation_id: {{segmentation_id}}
+      {% endif %}
+      {% endif %}
+    {% endif %}

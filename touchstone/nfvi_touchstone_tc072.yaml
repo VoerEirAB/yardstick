@@ -1,0 +1,131 @@
+---
+
+schema: "yardstick:task:0.1"
+description: >
+    Yardstick TC072 config file;
+    Measure network throughput and packet loss using pktgen;
+    Different amounts of flows are tested with, from 2 up to 1001000;
+    All tests are run 2 times each. First 2 times with the least
+    amount of ports, then 2 times with the next amount of ports,
+    and so on until all packet sizes have been run with;
+    During the measurements network usage statistics and network latency are
+    recorded/measured using sar and ping, respectively;
+
+# setting SLA
+{% set TC072_MAX_RTT = TC072_MAX_RTT or false %}
+{% set TC072_MAX_PPM = TC072_MAX_PPM or false %}
+
+{# -- Unused for touchstone as of now -- #}
+{% set provider = provider or false %}
+{% set physical_network = physical_network or none %}
+{% set segmentation_id = segmentation_id or none %}
+{# -- Unused end -- #}
+
+scenarios:
+-
+  type: NetUtilization
+  run_in_background: true
+
+  options:
+    interval: 1
+    count: 10
+
+  host: "host.touchstone_tc072"
+
+-
+  type: NetUtilization
+  run_in_background: true
+
+  options:
+    interval: 1
+    count: 10
+  host: "target.touchstone_tc072"
+
+-
+  type: Ping
+  run_in_background: true
+
+  options:
+    packetsize: 100
+
+  host: "host.touchstone_tc072"
+  target: "target.touchstone_tc072"
+
+  {% if TC072_MAX_RTT %}
+  sla:
+    max_rtt: {{TC072_MAX_RTT}}
+    action: monitor
+  {% endif %}
+
+{% for num_port in NUMBER_OF_PORTS %}
+-
+  type: Pktgen
+  options:
+    packetsize: {{PACKET_SIZE}}
+    number_of_ports: {{num_port}}
+    duration: {{DURATION}}
+
+  host: "host.touchstone_tc072"
+  target: "target.touchstone_tc072"
+
+  runner:
+    type: Iteration
+    iterations: 2
+    interval: 1
+
+  {% if TC072_MAX_PPM %}
+  sla:
+    max_ppm: {{TC072_MAX_PPM}}
+    action: monitor
+  {% endif %}
+{% endfor %}
+
+context:
+  name: touchstone_tc072
+  user: ubuntu
+  placement_groups:
+    pgrp1:
+      policy: {{PG_POLICY}}
+
+  servers:
+    host:
+      image: {{HOST_IMAGE}}
+      flavor: {{HOST_FLAVOR}}
+      placement: "pgrp1"
+      {% if FLOATING_IP_CREATION_SUPPORT %}
+      floating_ip: true
+      {% endif %}
+      {% if HOST_AVAILABILITY_ZONE %}
+      availability_zone: {{HOST_AVAILABILITY_ZONE}}
+      {% endif %}
+    target:
+      image: {{TARGET_IMAGE}}
+      flavor: {{TARGET_FLAVOR}}
+      placement: "pgrp1"
+      {% if FLOATING_IP_CREATION_SUPPORT %}
+      floating_ip: true
+      {% endif %}
+      {% if TARGET_AVAILABILITY_ZONE %}
+      availability_zone: {{TARGET_AVAILABILITY_ZONE}}
+      {% endif %}
+      {{PLACEMENT_POLICY}}: "host.: touchstone_tc072"
+
+  networks:
+    {% if not FLOATING_IP_CREATION_SUPPORT %}
+    {{SSH_NET_NAME}}:
+      subnet: {{SSH_SUBNET_ID}}
+      net_flags:
+        is_existing: true
+      vnic_type: {{VNIC_TYPE}}
+    {% else %}
+    test:
+      cidr: '10.0.1.0/24'
+      vnic_type: {{VNIC_TYPE}}
+      {% if provider == "vlan" or provider == "sriov" %}
+      provider: {{provider}}
+      physical_network: {{physical_network}}
+        {% if segmentation_id %}
+          segmentation_id: {{segmentation_id}}
+        {% endif %}
+      {% endif %}
+    {% endif %}

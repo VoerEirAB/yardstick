@@ -86,6 +86,20 @@ def get_endpoint(service_type, endpoint_type='publicURL'):
 # *********************************************
 #   CLIENTS
 # *********************************************
+
+def get_os_endpoint_type():
+    os_endpoint_type = {}
+    if os.getenv('OS_INTERFACE') is not None:
+        os_endpoint_type.update({
+            'interface': os.getenv('OS_INTERFACE')
+        })
+    if os.getenv('OS_ENDPOINT_TYPE') is not None:
+        os_endpoint_type.update({
+            'endpoint_type': os.getenv('OS_ENDPOINT_TYPE')
+        })
+
+    return os_endpoint_type
+
 def get_heat_api_version():     # pragma: no cover
     try:
         api_version = os.environ['HEAT_API_VERSION']
@@ -108,7 +122,8 @@ def get_cinder_client_version():      # pragma: no cover
 
 def get_cinder_client():      # pragma: no cover
     sess = get_session()
-    return cinderclient.Client(get_cinder_client_version(), session=sess)
+    kw = get_os_endpoint_type()
+    return cinderclient.Client(get_cinder_client_version(), session=sess, **kw)
 
 
 def get_nova_client_version():      # pragma: no cover
@@ -123,7 +138,8 @@ def get_nova_client_version():      # pragma: no cover
 
 def get_nova_client():      # pragma: no cover
     sess = get_session()
-    return novaclient.Client(get_nova_client_version(), session=sess)
+    kw = get_os_endpoint_type()
+    return novaclient.Client(get_nova_client_version(), session=sess, **kw)
 
 
 def get_neutron_client_version():   # pragma: no cover
@@ -138,7 +154,8 @@ def get_neutron_client_version():   # pragma: no cover
 
 def get_neutron_client():   # pragma: no cover
     sess = get_session()
-    return neutronclient.Client(get_neutron_client_version(), session=sess)
+    kw = get_os_endpoint_type()
+    return neutronclient.Client(get_neutron_client_version(), session=sess, **kw)
 
 
 def get_glance_client_version():    # pragma: no cover
@@ -153,7 +170,8 @@ def get_glance_client_version():    # pragma: no cover
 
 def get_glance_client():    # pragma: no cover
     sess = get_session()
-    return glanceclient.Client(get_glance_client_version(), session=sess)
+    kw = get_os_endpoint_type()
+    return glanceclient.Client(get_glance_client_version(), session=sess, **kw)
 
 
 def get_shade_client(**os_cloud_config):

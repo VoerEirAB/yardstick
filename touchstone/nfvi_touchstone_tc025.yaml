@@ -1,0 +1,67 @@
+---
+
+schema: "yardstick:task:0.1"
+description: >
+    Yardstick TC025 config file;
+    HA test case: OpenStack Control Node abnormally shutdown.
+
+{% set file = file or 'pod.yaml' %}
+
+# setting SLA
+{% set TC025_MAX_OUTAGE_TIME = TC025_MAX_OUTAGE_TIME or false %}
+
+scenarios:
+-
+  type: ServiceHA
+  options:
+    attackers:
+    - fault_type: "bare-metal-down"
+      host: controller_node
+
+    monitors:
+    - monitor_type: "openstack-cmd"
+      command_name: "openstack image list"
+      monitor_time: {{MONITOR_TIME}}
+      monitor_number: 3
+      sla:
+        max_outage_time: {{OUTAGE_TIME}}
+
+    - monitor_type: "openstack-cmd"
+      command_name: "openstack router list"
+      monitor_time: {{MONITOR_TIME}}
+      monitor_number: 3
+      sla:
+        max_outage_time: {{OUTAGE_TIME}}
+
+    - monitor_type: "openstack-cmd"
+      command_name: "openstack stack list"
+      monitor_time: {{MONITOR_TIME}}
+      monitor_number: 3
+      sla:
+        max_outage_time: {{OUTAGE_TIME}}
+
+    - monitor_type: "openstack-cmd"
+      command_name: "openstack volume list"
+      monitor_time: {{MONITOR_TIME}}
+      monitor_number: 3
+      sla:
+        max_outage_time: {{OUTAGE_TIME}}
+
+  nodes:
+    controller_node: controller_node.LF
+
+  runner:
+    type: Iteration
+    iterations: 1
+
+  {% if TC025_MAX_OUTAGE_TIME %}
+  sla:
+    outage_time: {{ TC025_MAX_OUTAGE_TIME }}
+    action: monitor
+  {% endif %}
+
+
+context:
+  type: Node
+  name: LF
+  file: {{file}}

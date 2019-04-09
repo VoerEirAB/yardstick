@@ -1,0 +1,87 @@
+---
+
+schema: "yardstick:task:0.1"
+description: >
+    Yardstick TC011 config file;
+    Measure packet delay variation (jitter) using iperf3.
+
+# setting SLA
+{% set TC011_JITTER = TC011_JITTER or false %}
+
+{# -- Unused for touchstone as of now -- #}
+{% set provider = provider or false %}
+{% set physical_network = physical_network or none %}
+{% set segmentation_id = segmentation_id or none %}
+{# -- Unused end -- #}
+
+scenarios:
+-
+  type: Iperf3
+  options:
+    protocol: "udp"
+    bandwidth: {{ BANDWIDTH }}
+    length: "8K"
+    window: 29200
+
+  host: "host.touchstone_tc011"
+  target: "target.touchstone_tc011"
+
+  runner:
+    type: Duration
+    duration: {{DURATION}}
+
+  {% if TC011_JITTER %}
+  sla:
+    jitter: {{ TC011_JITTER }}
+    action: monitor
+  {% endif %}
+
+context:
+  name: touchstone_tc011
+  user: ubuntu
+  placement_groups:
+    pgrp1:
+      policy: {{PG_POLICY}}
+
+  servers:
+    host:
+      image: {{HOST_IMAGE}}
+      flavor: {{HOST_FLAVOR}}
+      placement: "pgrp1"
+      {% if FLOATING_IP_CREATION_SUPPORT %}
+      floating_ip: true
+      {% endif %}
+      {% if HOST_AVAILABILITY_ZONE %}
+      availability_zone: {{HOST_AVAILABILITY_ZONE}}
+      {% endif %}
+    target:
+      image: {{TARGET_IMAGE}}
+      flavor: {{TARGET_FLAVOR}}
+      placement: "pgrp1"
+      {% if FLOATING_IP_CREATION_SUPPORT %}
+      floating_ip: true
+      {% endif %}
+      {% if TARGET_AVAILABILITY_ZONE %}
+      availability_zone: {{TARGET_AVAILABILITY_ZONE}}
+      {% endif %}
+      {{PLACEMENT_POLICY}}: "host.touchstone_tc011"
+
+  networks:
+    {% if not FLOATING_IP_CREATION_SUPPORT %}
+    {{SSH_NET_NAME}}:
+      subnet: {{SSH_SUBNET_ID}}
+      net_flags:
+        is_existing: true
+      vnic_type: {{VNIC_TYPE}}
+    {% else %}
+    test:
+      cidr: '10.0.1.0/24'
+      vnic_type: {{VNIC_TYPE}}
+      {% if provider == "vlan" or provider == "sriov" %}
+      provider: {{provider}}
+      physical_network: {{physical_network}}
+        {% if segmentation_id %}
+          segmentation_id: {{segmentation_id}}
+        {% endif %}
+      {% endif %}
+    {% endif %}

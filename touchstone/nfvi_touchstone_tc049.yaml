@@ -1,0 +1,53 @@
+---
+
+schema: "yardstick:task:0.1"
+description: >
+    Yardstick TC049 config file;
+    HA test case: Control node Openstack service down - swift-proxy.
+
+{% set file = file or 'pod.yaml' %}
+{% set ATTACK_PROCESS = "swift-proxy" %}
+
+# setting SLA
+{% set TC049_MAX_OUTAGE_TIME = TC049_MAX_OUTAGE_TIME or false %}
+
+scenarios:
+-
+  type: ServiceHA
+  options:
+    attackers:
+    - fault_type: "kill-process"
+      process_name: {{ATTACK_PROCESS}}
+      host: controller_node
+
+    monitors:
+    - monitor_type: "openstack-cmd"
+      command_name: "swift stat"
+      monitor_time: {{MONITOR_TIME}}
+      monitor_number: 3
+      sla:
+        max_outage_time: {{OUTAGE_TIME}}
+    - monitor_type: "process"
+      process_name: {{ATTACK_PROCESS}}
+      host: controller_node
+      monitor_time: {{MONITOR_TIME}}
+      monitor_number: 3
+      sla:
+        max_recover_time: {{RECOVERY_TIME}}
+
+  nodes:
+    controller_node: controller_node.LF
+
+  runner:
+    type: Duration
+    duration: 1
+  {% if TC049_MAX_OUTAGE_TIME %}
+  sla:
+    outage_time: {{ TC049_MAX_OUTAGE_TIME }}
+    action: monitor
+  {% endif %}
+
+context:
+  type: Node
+  name: LF
+  file: {{file}}

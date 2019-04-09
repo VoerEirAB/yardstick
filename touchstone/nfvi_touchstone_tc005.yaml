@@ -1,0 +1,102 @@
+---
+# Yardstick TC005 config file
+# Measure Storage IOPS, throughput and latency using fio
+
+schema: "yardstick:task:0.1"
+description: >
+    Yardstick TC005 config file;
+    Measure Storage IOPS, throughput and latency using fio.
+
+# setting SLA
+{% set TC005_READ_BW = TC005_READ_BW or false %}
+{% set TC005_READ_IOPS = TC005_READ_IOPS or false %}
+{% set TC005_READ_LAT = TC005_READ_LAT or false %}
+{% set TC005_WRITE_BW = TC005_WRITE_BW or false %}
+{% set TC005_WRITE_IOPS = TC005_WRITE_IOPS or false %}
+{% set TC005_WRITE_LAT = TC005_WRITE_LAT or false %}
+
+{# -- Unused for touchstone as of now -- #}
+{% set provider = provider or false %}
+{% set physical_network = physical_network or none %}
+{% set segmentation_id = segmentation_id or none %}
+{# -- Unused end -- #}
+
+scenarios:
+{% for rw in RW_SCENARIOS %}
+  {% for bs in BLOCK_SIZES %}
+-
+  type: Fio
+  options:
+    filename: /home/ubuntu/data.raw
+    bs: {{bs}}
+    rw: {{rw}}
+    ramp_time: 10
+    duration: 20
+
+  host: "host.touchstone_tc005"
+
+  runner:
+    type: Iteration
+    iterations: 1
+    interval: 1
+
+  {% if TC005_READ_BW or TC005_READ_IOPS or TC005_READ_LAT or TC005_WRITE_BW or TC005_WRITE_IOPS or TC005_WRITE_LAT %}
+  sla:
+    {% if TC005_READ_BW %}
+    read_bw: {{TC005_READ_BW}}
+    {% endif %}
+    {% if TC005_READ_IOPS %}
+    read_iops: {{TC005_READ_IOPS}}
+    {% endif %}
+    {% if TC005_READ_LAT %}
+    read_lat: {{TC005_READ_LAT}}
+    {% endif %}
+    {% if TC005_WRITE_BW %}
+    write_bw: {{TC005_WRITE_BW}}
+    {% endif %}
+    {% if TC005_WRITE_IOPS %}
+    write_iops: {{TC005_WRITE_IOPS}}
+    {% endif %}
+    {% if TC005_WRITE_LAT %}
+    write_lat: {{TC005_WRITE_LAT}}
+    {% endif %}
+    action: monitor
+  {% endif %}
+
+  {% endfor %}
+{% endfor %}
+
+context:
+  name: touchstone_tc005
+  user: ubuntu
+
+  servers:
+    host:
+      image: {{HOST_IMAGE}}
+      flavor: {{HOST_FLAVOR}}
+      {% if FLOATING_IP_CREATION_SUPPORT %}
+      floating_ip: true
+      {% endif %}
+      {% if HOST_AVAILABILITY_ZONE %}
+      availability_zone: {{HOST_AVAILABILITY_ZONE}}
+      {% endif %}
+
+  networks:
+    {% if not FLOATING_IP_CREATION_SUPPORT %}
+    {{SSH_NET_NAME}}:
+      subnet: {{SSH_SUBNET_ID}}
+      net_flags:
+        is_existing: true
+      vnic_type: {{VNIC_TYPE}}
+    {% else %}
+    test:
+      cidr: '10.0.1.0/24'
+      vnic_type: {{VNIC_TYPE}}
+      {% if provider == "vlan" or provider == "sriov" %}
+      provider: {{provider}}
+      physical_network: {{physical_network}}
+      {% if segmentation_id %}
+      segmentation_id: {{segmentation_id}}
+      {% endif %}
+      {% endif %}
+    {% endif %}

@@ -1,0 +1,76 @@
+---
+
+schema: "yardstick:task:0.1"
+description: >
+    Yardstick TC014 config file;
+    Measure Processing speed using unixbench.
+
+# setting SLA
+{% set TC014_SINGLE_SCORE = TC014_SINGLE_SCORE or false %}
+{% set TC014_PARALLEL_SCORE = TC014_PARALLEL_SCORE or false %}
+
+{# -- Unused for touchstone as of now -- #}
+{% set provider = provider or false %}
+{% set physical_network = physical_network or none %}
+{% set segmentation_id = segmentation_id or none %}
+{# -- Unused end -- #}
+
+scenarios:
+-
+  type: UnixBench
+  options:
+    run_mode: 'verbose'
+    test_type: {{TEST_TYPE}}
+
+  host: "host.touchstone_tc014"
+
+  runner:
+    type: Iteration
+    iterations: 1
+    interval: 1
+
+  {% if TC014_SINGLE_SCORE or TC014_PARALLEL_SCORE  %}
+  sla:
+    {% if TC014_SINGLE_SCORE %}
+    single_score: {{TC014_SINGLE_SCORE}}
+    {% endif %}
+    {% if TC014_PARALLEL_SCORE %}
+    parallel_score: {{TC014_PARALLEL_SCORE}}
+    {% endif %}
+    action: monitor
+  {% endif %}
+
+context:
+  name: touchstone_tc014
+  user: ubuntu
+
+  servers:
+    host:
+      image: {{HOST_IMAGE}}
+      flavor: {{HOST_FLAVOR}}
+      {% if FLOATING_IP_CREATION_SUPPORT %}
+      floating_ip: true
+      {% endif %}
+      {% if HOST_AVAILABILITY_ZONE %}
+      availability_zone: {{HOST_AVAILABILITY_ZONE}}
+      {% endif %}
+
+  networks:
+    {% if not FLOATING_IP_CREATION_SUPPORT %}
+    {{SSH_NET_NAME}}:
+      subnet: {{SSH_SUBNET_ID}}
+      net_flags:
+        is_existing: true
+      vnic_type: {{VNIC_TYPE}}
+    {% else %}
+    test:
+      cidr: '10.0.1.0/24'
+      vnic_type: {{VNIC_TYPE}}
+      {% if provider == "vlan" or provider == "sriov" %}
+      provider: {{provider}}
+      physical_network: {{physical_network}}
+      {% if segmentation_id %}
+      segmentation_id: {{segmentation_id}}
+      {% endif %}
+      {% endif %}
+    {% endif %}

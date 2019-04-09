@@ -1,0 +1,82 @@
+---
+# Yardstick TC042 config file
+# Measure network latency using testpmd and pktgen-dpdk
+
+schema: "yardstick:task:0.1"
+description: >
+    Yardstick TC042 config file;
+    Measure network latency using testpmd and pktgen-dpdk.
+
+# setting SLA
+{% set TC042_MAX_LATENCY = TC042_MAX_LATENCY or false %}
+
+scenarios:
+-
+  type: PktgenDPDKLatency
+  options:
+    packetsize: {{PACKET_SIZE}}
+    rate: 100
+    eth1: {{ETH1_NAME}}
+    eth2: {{ETH2_NAME}}
+  host: "host.touchstone_tc042"
+  target: "target.touchstone_tc042"
+
+  runner:
+    type: Iteration
+    iterations: 1
+    interval: 1
+
+  {% if TC042_MAX_LATENCY %}
+  sla:
+    max_latency: {{TC042_MAX_LATENCY}}
+    action: monitor
+  {% endif %}
+
+context:
+  name: touchstone_tc042
+  user: ubuntu
+  placement_groups:
+    pgrp1:
+      policy: {{PG_POLICY}}
+
+  servers:
+    host:
+      image: {{HOST_IMAGE}}
+      flavor: {{HOST_FLAVOR}}
+      placement: "pgrp1"
+      {% if FLOATING_IP_CREATION_SUPPORT %}
+      floating_ip: true
+      {% endif %}
+      {% if HOST_AVAILABILITY_ZONE %}
+      availability_zone: {{HOST_AVAILABILITY_ZONE}}
+      {% endif %}
+    target:
+      image: {{TARGET_IMAGE}}
+      flavor: {{TARGET_FLAVOR}}
+      placement: "pgrp1"
+      {% if FLOATING_IP_CREATION_SUPPORT %}
+      floating_ip: true
+      {% endif %}
+      {% if TARGET_AVAILABILITY_ZONE %}
+      availability_zone: {{TARGET_AVAILABILITY_ZONE}}
+      {% endif %}
+      {{PLACEMENT_POLICY}}: "host.touchstone_tc042"
+
+  networks:
+    {% if not FLOATING_IP_CREATION_SUPPORT %}
+    {{SSH_NET_NAME}}:
+      subnet: {{SSH_SUBNET_ID}}
+      net_flags:
+        is_existing: true
+      vnic_type: {{VNIC_TYPE}}
+    {% else %}
+    test:
+      cidr: '10.0.1.0/24'
+      vnic_type: {{VNIC_TYPE}}
+    {% endif %}
+    test2:
+      cidr: '10.0.2.0/24'
+      vnic_type: {{VNIC_TYPE}}
+    test3:
+      cidr: '10.0.3.0/24'
+      vnic_type: {{VNIC_TYPE}}

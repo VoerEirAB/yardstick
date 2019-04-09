@@ -1,0 +1,116 @@
+---
+# Sample benchmark task config file
+# measure network latency and throughput using netperf
+# There are two sample scenarios: bulk test and request/response test
+# In bulk test, UDP_STREAM and TCP_STREAM can be used
+# send_msg_size and recv_msg_size are options of bulk test
+# In req/rsp test, TCP_RR TCP_CRR UDP_RR can be used
+# req_rsp_size is option of req/rsp test
+
+schema: "yardstick:task:0.1"
+
+description: >
+    Yardstick TC083 config file;
+    Measure network latency and throughput using netperf.
+
+{# -- Unused for touchstone as of now -- #}
+{% set provider = provider or false %}
+{% set physical_network = physical_network or none %}
+{% set segmentation_id = segmentation_id or none %}
+{# -- Unused end -- #}
+
+# setting SLA
+{% set TC083_MEAN_LATENCY = TC083_MEAN_LATENCY or false %}
+
+
+scenarios:
+-
+  type: Netperf
+  options:
+    testname: 'UDP_STREAM'
+    send_msg_size: {{ PACKET_SIZE }}
+    duration: {{ DURATION }}
+
+  host: "host.touchstone_tc083"
+  target: "target.touchstone_tc083"
+
+  runner:
+    type: Iteration
+    iterations: 1
+    interval: 1
+
+  {% if TC083_MEAN_LATENCY %}
+  sla:
+    mean_latency: {{ TC083_MEAN_LATENCY }}
+    action: monitor
+  {% endif %}
+-
+  type: Netperf
+  options:
+    testname: 'TCP_RR'
+    req_rsp_size: '32,1024'
+
+  host: "host.touchstone_tc083"
+  target: "target.touchstone_tc083"
+
+  runner:
+    type: Duration
+    duration: {{ DURATION }}
+    interval: 1
+
+  {% if TC083_MEAN_LATENCY %}
+  sla:
+    mean_latency: {{ TC083_MEAN_LATENCY }}
+    action: monitor
+  {% endif %}
+
+context:
+  name: touchstone_tc083
+  user: ubuntu
+  placement_groups:
+    pgrp1:
+      policy: {{PG_POLICY}}
+
+  servers:
+    host:
+      image: {{HOST_IMAGE}}
+      flavor: {{HOST_FLAVOR}}
+      placement: "pgrp1"
+      {% if FLOATING_IP_CREATION_SUPPORT %}
+      floating_ip: true
+      {% endif %}
+      {% if HOST_AVAILABILITY_ZONE %}
+      availability_zone: {{HOST_AVAILABILITY_ZONE}}
+      {% endif %}
+    target:
+      image: {{TARGET_IMAGE}}
+      flavor: {{TARGET_FLAVOR}}
+      placement: "pgrp1"
+      {% if FLOATING_IP_CREATION_SUPPORT %}
+      floating_ip: true
+      {% endif %}
+      {% if TARGET_AVAILABILITY_ZONE %}
+      availability_zone: {{TARGET_AVAILABILITY_ZONE}}
+      {% endif %}
+      {{PLACEMENT_POLICY}}: "host.touchstone_tc083"
+
+  networks:
+    {% if not FLOATING_IP_CREATION_SUPPORT %}
+    {{SSH_NET_NAME}}:
+      subnet: {{SSH_SUBNET_ID}}
+      net_flags:
+        is_existing: true
+      vnic_type: {{VNIC_TYPE}}
+    {% else %}
+    test:
+      cidr: '10.0.1.0/24'
+      vnic_type: {{VNIC_TYPE}}
+      {% if provider == "vlan" or provider == "sriov" %}
+      provider: {{provider}}
+      physical_network: {{physical_network}}
+        {% if segmentation_id %}
+          segmentation_id: {{segmentation_id}}
+        {% endif %}
+      {% endif %}
+    {% endif %}
+

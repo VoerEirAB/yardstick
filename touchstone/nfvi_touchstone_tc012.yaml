@@ -1,0 +1,72 @@
+---
+
+schema: "yardstick:task:0.1"
+description: >
+    Yardstick TC012 config file;
+    Measure memory read and write bandwidth using lmbench.
+
+# setting SLA
+{% set TC012_MIN_BANDWIDTH = TC012_MIN_BANDWIDTH or false %}
+
+{# -- Unused for touchstone as of now -- #}
+{% set provider = provider or false %}
+{% set physical_network = physical_network or none %}
+{% set segmentation_id = segmentation_id or none %}
+{# -- Unused end -- #}
+
+scenarios:
+-
+  type: Lmbench
+  options:
+    test_type: "bandwidth"
+    size: {{SIZE}}
+    benchmark: {{BENCHMARK}}
+    warmup: {{WARMUP}}
+
+  host: "host.touchstone_tc012"
+
+  runner:
+    type: Iteration
+    iterations: {{ITERATION}}
+    interval: {{ITERATION_INTERVAL}}
+
+  {% if TC012_MIN_BANDWIDTH %}
+  sla:
+    min_bandwidth: {{TC012_MIN_BANDWIDTH}}
+    action: monitor
+  {% endif %}
+
+context:
+  name: touchstone_tc012
+  user: ubuntu
+
+  servers:
+    host:
+      image: {{HOST_IMAGE}}
+      flavor: {{HOST_FLAVOR}}
+      {% if FLOATING_IP_CREATION_SUPPORT %}
+      floating_ip: true
+      {% endif %}
+      {% if HOST_AVAILABILITY_ZONE %}
+      availability_zone: {{HOST_AVAILABILITY_ZONE}}
+      {% endif %}
+
+  networks:
+    {% if not FLOATING_IP_CREATION_SUPPORT %}
+    {{SSH_NET_NAME}}:
+      subnet: {{SSH_SUBNET_ID}}
+      net_flags:
+        is_existing: true
+      vnic_type: {{VNIC_TYPE}}
+    {% else %}
+    test:
+      cidr: '10.0.1.0/24'
+      vnic_type: {{VNIC_TYPE}}
+      {% if provider == "vlan" or provider == "sriov" %}
+      provider: {{provider}}
+      physical_network: {{physical_network}}
+      {% if segmentation_id %}
+      segmentation_id: {{segmentation_id}}
+      {% endif %}
+      {% endif %}
+    {% endif %}
