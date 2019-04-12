@@ -1,0 +1,58 @@
+---
+
+schema: "yardstick:task:0.1"
+description: >
+
+    Yardstick TC019 config file;
+    HA test case: HA test case: Control node Openstack service down - nova-api.
+
+{% set file = file or 'pod.yaml' %}
+
+# setting SLA
+{% set TC019_OUTAGE_TIME = TC019_OUTAGE_TIME or false %}
+{% set TC019_MAX_OUTAGE_TIME = TC019_MAX_OUTAGE_TIME or MONITOR_TIME_OUTAGE %}
+{% set TC019_MAX_RECOVERY_TIME = TC019_MAX_RECOVERY_TIME or MONITOR_TIME_RECOVERY %}
+
+scenarios:
+-
+  type: ServiceHA
+  options:
+    attackers:
+    - fault_type: "kill-process"
+      process_name: "nova-api"
+      host: controller_node
+
+    wait_time: {{WAIT_TIME}}
+    monitors:
+    - monitor_type: "openstack-cmd"
+      command_name: "openstack image list"
+      monitor_time: {{MONITOR_TIME_OUTAGE}}
+      monitor_number: 3
+      sla:
+        max_outage_time: {{TC019_MAX_OUTAGE_TIME}}
+    - monitor_type: "process"
+      process_name: "nova-api"
+      host: controller_node
+      monitor_time: {{MONITOR_TIME_RECOVERY}}
+      monitor_number: 3
+      sla:
+        max_recover_time: {{TC019_MAX_RECOVERY_TIME}}
+
+  nodes:
+    controller_node: controller_node.LF
+
+  runner:
+    type: Iteration
+    iterations: 1
+
+  {% if TC019_OUTAGE_TIME %}
+  sla:
+    outage_time: {{ TC019_OUTAGE_TIME }}
+    action: monitor
+  {% endif %}
+
+
+context:
+  type: Node
+  name: LF
+  file: {{file}}

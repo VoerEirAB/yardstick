@@ -1,0 +1,36 @@
+---
+
+schema: "yardstick:task:0.1"
+description: >
+    Yardstick TC043 config file;
+    Measure latency between NFVI nodes using ping.
+
+{% set file = file or 'pod.yaml' %}
+
+# setting SLA
+{% set TC043_MAX_RTT = TC043_MAX_RTT or false %}
+
+scenarios:
+-
+  type: Ping
+  options:
+    packetsize: {{ PACKET_SIZE }}
+  host: host_compute_node.LF
+  target: target_compute_node.LF
+
+  runner:
+    type: Duration
+    duration: {{DURATION}}
+    interval: {{INTERVAL}}
+
+  {% if TC043_MAX_RTT %}
+  sla:
+    max_rtt: {{ TC043_MAX_RTT }}
+    action: monitor
+  {% endif %}
+
+context:
+  type: Node
+  name: LF
+  file: {{file}}
+

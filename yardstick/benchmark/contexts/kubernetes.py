@@ -164,7 +164,10 @@ class KubernetesContext(ctx_base.Context):
         utils.remove_file(self.public_key_path)
 
     def _get_server(self, name):
-        node_ports = self._get_service_ports(name)
+        try:
+            node_ports = self._get_service_ports(name)
+        except exceptions.KubernetesServiceObjectNotDefined:
+            return None
         for sn_port in (sn_port for sn_port in node_ports
                         if sn_port['port'] == constants.SSH_PORT):
             node_port = sn_port['node_port']

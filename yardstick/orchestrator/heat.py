@@ -33,7 +33,13 @@ from yardstick.common import openstack_utils as op_utils
 log = logging.getLogger(__name__)
 
 
+HEAT_KEY_UUID_LENGTH = 8
+
 PROVIDER_SRIOV = "sriov"
+
+
+def get_short_key_uuid(uuid):
+    return str(uuid)[:HEAT_KEY_UUID_LENGTH]
 
 _DEPLOYED_STACKS = {}
 
@@ -127,10 +133,10 @@ class HeatStack(object):
 class HeatTemplate(object):
     """Describes a Heat template and a method to deploy template to a stack"""
 
-    DESCRIPTION_TEMPLATE = """
+    DESCRIPTION_TEMPLATE = """\
 Stack built by the yardstick framework for %s on host %s %s.
 All referred generated resources are prefixed with the template
-name (i.e. %s).
+name (i.e. %s).\
 """
 
     HEAT_WAIT_LOOP_INTERVAL = 2
@@ -435,7 +441,7 @@ name (i.e. %s).
             }
         }
 
-    def add_keypair(self, name, key_id):
+    def add_keypair(self, name, key_uuid):
         """add to the template a Nova KeyPair"""
         log.debug("adding Nova::KeyPair '%s'", name)
         self.resources[name] = {
@@ -447,7 +453,7 @@ name (i.e. %s).
                     pkg_resources.resource_string(
                         'yardstick.resources',
                         'files/yardstick_key-' +
-                        key_id + '.pub'),
+                        get_short_key_uuid(key_uuid) + '.pub'),
                     'utf-8')
             }
         }

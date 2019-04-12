@@ -1,0 +1,59 @@
+##############################################################################
+# Copyright (c) 2017 Huawei Technologies Co.,Ltd and others.
+#
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Apache License, Version 2.0
+# which accompanies this distribution, and is available at
+# http://www.apache.org/licenses/LICENSE-2.0
+##############################################################################
+---
+
+schema: "yardstick:task:0.1"
+description: >
+    Test case for TC074 StorPerf benchmark task config file;
+    StorPerf is a tool to measure block and object storage performance in an NFVI.
+
+{% set EXTERNAL_NETWORK = EXTERNAL_NETWORK or "ext-net" %}
+{% set StorPerf_ip = StorPerf_ip or "141.255.186.141" %}
+{% set workload = workload or "" %}
+{% set workloads = workloads or "" %}
+{% set agent_count = agent_count or 1 %}
+{% set block_sizes = block_sizes or "4096" %}
+{% set queue_depths = queue_depths or "4" %}
+{% set steady_state_samples = steady_state_samples or 10 %}
+{% set volume_size = volume_size or 4 %}
+{% set volume_count = volume_count or 1 %}
+{% set volume_type = volume_type or "" %}
+{% set availability_zone = availability_zone or "nova" %}
+{% set subnet_CIDR = subnet_CIDR or "10.22.0.0/24" %}
+{% set stack_name = stack_name or "StorperfAgentGroup" %}
+scenarios:
+-
+  type: StorPerf
+  options:
+    agent_count: {{agent_count}}
+    agent_image: {{IMAGE_NAME}}
+    agent_flavor: {{FLAVOR_NAME}}
+    public_network: {{EXTERNAL_NETWORK}}
+    volume_size: {{volume_size}}
+    block_sizes: {{block_sizes}}
+    queue_depths: {{queue_depths}}
+    StorPerf_ip: {{StorPerf_ip}}
+    query_interval: 10
+    timeout: 300
+    workload: {{workload}}
+    workloads: {{workloads}}
+    steady_state_samples: {{steady_state_samples}}
+    volume_count: {{volume_count}}
+    volume_type: {{volume_type}}
+    availability_zone: {{availability_zone}}
+    subnet_CIDR: {{subnet_CIDR}}
+    stack_name: {{stack_name}}
+
+  runner:
+    type: Iteration
+    iterations: 1
+
+context:
+  type: Dummy
+  name: Dummy

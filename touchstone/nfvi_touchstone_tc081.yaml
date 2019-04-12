@@ -1,0 +1,72 @@
+##############################################################################
+# Copyright (c) 2017 Huawei AB and others.
+#
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Apache License, Version 2.0
+# which accompanies this distribution, and is available at
+# http://www.apache.org/licenses/LICENSE-2.0
+##############################################################################
+
+---
+
+schema: "yardstick:task:0.1"
+description: >
+    Yardstick TC081 config file;
+    measure network latency between container and VM using ping;
+
+
+scenarios:
+-
+  type: Ping
+  options:
+    packetsize: 200
+
+  host: host-k8s_tc081
+  target: target.touchstone_tc081
+
+  runner:
+    type: Duration
+    duration: 60
+    interval: 1
+
+  sla:
+    max_rtt: 10
+    action: monitor
+
+contexts:
+-
+  type: Kubernetes
+  name: k8s_tc081
+
+  servers:
+    host:
+      image: openretriever/yardstick
+      command: /bin/bash
+      args: ['-c', 'mkdir /root/.ssh; cp /tmp/.ssh/authorized_keys ~/.ssh/.;
+                    chmod 700 ~/.ssh; chmod 600 ~/.ssh/*; service ssh restart;
+                    while true ; do sleep 10000; done']
+-
+  type: Heat
+  name: touchstone_tc081
+  user: ubuntu
+  image: {{IMAGE_NAME}}
+  flavor: {{FLAVOR_NAME}}
+  servers:
+    target:
+      {% if FLOATING_IP_CREATION_SUPPORT %}
+      floating_ip: true
+      {% endif %}
+      {% if AVAILABILITY_ZONE %}
+      availability_zone: {{AVAILABILITY_ZONE}}
+      {% endif %}
+
+  networks:
+    {% if not FLOATING_IP_CREATION_SUPPORT %}
+      {{SSH_NET_NAME}}:
+        subnet: {{SSH_SUBNET_ID}}
+        net_flags:
+          is_existing: true
+      {% else %}
+      test:
+        cidr: '10.0.1.0/24'
+      {% endif %}
