@@ -69,3 +69,6 @@ stevedore==1.25.0       # OSI Approved  Apache Software License
 traceback2==1.4.0       # OSI Approved  Python Software Foundation License
 unicodecsv==0.14.1      # BSD License; OSI Approved  BSD License
 wrapt==1.10.10          # BSD
+
+# YS needs advanced openstack client
+python-openstackclient==3.18.0
