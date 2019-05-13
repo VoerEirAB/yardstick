@@ -1,29 +1,30 @@
-##############################################################################
-# Copyright (c) 2017 Huawei Technologies Co.,Ltd and others.
-#
-# All rights reserved. This program and the accompanying materials
-# are made available under the terms of the Apache License, Version 2.0
-# which accompanies this distribution, and is available at
-# http://www.apache.org/licenses/LICENSE-2.0
-##############################################################################
 ---
 
 schema: "yardstick:task:0.1"
 description: >
     Yardstick TC006 config file;
     Measure volume storage IOPS, throughput and latency using fio with job file.
-{% set FLOATING_IP_CREATION_SUPPORT = FLOATING_IP_CREATION_SUPPORT or false %}
-{% set IMAGE_NAME = IMAGE_NAME or 'touchstone-server' %}
-{% set FLAVOR_NAME = FLAVOR_NAME or 'touchstone-flavor' %}
-{% set AVAILABILITY_ZONE = AVAILABILITY_ZONE or false %}
-{% set job_file_config = job_file_config or '["[random-writers]", ioengine=libaio, rw=randrw, size=128m, bs=32k, direct=0, size=64m, numjobs=4, time_based=1, runtime=10]' %}
-{% set directory = directory or '/tmp/FIO_Test' %}
-{% set volume_size = volume_size or 20 %}
+
+{% set selection = ['0', '1' ,'2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'] %}
+{% macro random_suffix() %}{% for n in range(0,12) %}{{ selection|random }}{% endfor %}{% endmacro %}
+
+
+{% set job_file_config = job_file_config or '["[random-writers]", ioengine='~IOENGINE~', rw='~OPERATION_MODE~', size='~SIZE~'m, bs='~BLOCK_SIZE~'k, direct=0, numjobs='~NO_OF_JOBS~']' %}
+{% set directory = '/tmp/FIO_Test' %}
+
+# setting SLA
+{% set TC006_READ_BW = TC006_READ_BW or false %}
+{% set TC006_READ_IOPS = TC006_READ_IOPS or false %}
+{% set TC006_READ_LAT = TC006_READ_LAT or false %}
+{% set TC006_WRITE_BW = TC006_WRITE_BW or false %}
+{% set TC006_WRITE_IOPS = TC006_WRITE_IOPS or false %}
+{% set TC006_WRITE_LAT = TC006_WRITE_LAT or false %}
+
+{# -- Unused for touchstone as of now -- #}
 {% set provider = provider or none %}
 {% set physical_network = physical_network or 'physnet1' %}
 {% set segmentation_id = segmentation_id or none %}
-
-schema: "yardstick:task:0.1"
+{# -- Unused end -- #}
 
 scenarios:
 -
@@ -35,38 +36,52 @@ scenarios:
     #job_file: "job_file.ini"
     directory: {{ directory }}
 
-  host: fio.touchstone_tc006
+  host: host.touchstone_tc006
 
   runner:
     type: Iteration
     iterations: 1
     interval: 1
 
+  {% if TC006_READ_BW or TC006_READ_IOPS or TC006_READ_LAT or TC006_WRITE_BW or TC006_WRITE_IOPS or TC006_WRITE_LAT %}
   sla:
-    read_bw: 6000
-    read_iops: 1500
-    read_lat: 500.1
-    write_bw: 6000
-    write_iops: 1500
-    write_lat: 500.1
+    {% if TC006_READ_BW %}
+    read_bw: {{TC006_READ_BW}}
+    {% endif %}
+    {% if TC006_READ_IOPS %}
+    read_iops: {{TC006_READ_IOPS}}
+    {% endif %}
+    {% if TC006_READ_LAT %}
+    read_lat: {{TC006_READ_LAT}}
+    {% endif %}
+    {% if TC006_WRITE_BW %}
+    write_bw: {{TC006_WRITE_BW}}
+    {% endif %}
+    {% if TC006_WRITE_IOPS %}
+    write_iops: {{TC006_WRITE_IOPS}}
+    {% endif %}
+    {% if TC006_WRITE_LAT %}
+    write_lat: {{TC006_WRITE_LAT}}
+    {% endif %}
     action: monitor
+  {% endif %}
 
 context:
   name: touchstone_tc006
   user: ubuntu
-  image: {{IMAGE_NAME}}
-  flavor: {{FLAVOR_NAME}}
   servers:
-    fio:
+    host:
+      image: {{HOST_IMAGE}}
+      flavor: {{HOST_FLAVOR}}
       {% if FLOATING_IP_CREATION_SUPPORT %}
       floating_ip: true
       {% endif %}
-      {% if AVAILABILITY_ZONE %}
-      availability_zone: {{AVAILABILITY_ZONE}}
+      {% if HOST_AVAILABILITY_ZONE %}
+      availability_zone: {{HOST_AVAILABILITY_ZONE}}
       {% endif %}
       volume:
-        name: test-volume
-        size: {{volume_size}}
+        name: touchstone_tc006-random_suffix()-volume
+        size: {{HOST_ATTACHED_VOLUME_SIZE}}
       volume_mountpoint: /dev/vdb
 
   networks:
@@ -75,9 +90,11 @@ context:
       subnet: {{SSH_SUBNET_ID}}
       net_flags:
         is_existing: true
+      vnic_type: {{VNIC_TYPE}}
     {% else %}
     test:
       cidr: '10.0.1.0/24'
+      vnic_type: {{VNIC_TYPE}}
       {% if provider == "vlan" or provider == "sriov" %}
       provider: {{provider}}
       physical_network: {{physical_network}}

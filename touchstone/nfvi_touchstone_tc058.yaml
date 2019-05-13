@@ -1,0 +1,104 @@
+---
+
+schema: "yardstick:task:0.1"
+description: >
+    Yardstick TC058 config file;
+    HA test case: OpenStack Controller Virtual Router Service High Availability.
+
+{% set file = file or 'pod.yaml' %}
+{% set ATTACK_PROCESS = "neutron-l3-agent" %}
+
+{% set TC058_MAX_OUTAGE_TIME = TC058_MAX_OUTAGE_TIME or false %}
+
+scenarios:
+  -
+    type: "GeneralHA"
+    options:
+      attackers:
+        -
+          fault_type: "kill-process"
+          host: controller_node
+          key: "kill-process"
+          process_name: "{{ ATTACK_PROCESS }}"
+
+      monitors:
+        -
+          monitor_type: "process"
+          process_name: "{{ ATTACK_PROCESS }}"
+          host: controller_node
+          key: "monitor-recovery"
+          monitor_time: {{MONITOR_TIME}}
+
+        -
+          monitor_type: "general-monitor"
+          monitor_key: "ip-status"
+          key: "server-status"
+          monitor_time: {{MONITOR_TIME}}
+          {% if TC058_MAX_OUTAGE_TIME %}
+          sla:
+            max_outage_time: {{TC058_MAX_OUTAGE_TIME}}
+          {% endif %}
+          parameter:
+            ip_address: "@floating_ip"
+
+      operations:
+        -
+          operation_type: "general-operation"
+          key: "get-floatingip"
+          operation_key: "get-floatingip"
+          action_parameter:
+            server_name: "host"
+          return_parameter:
+            all: "@floating_ip"
+
+
+      steps:
+        -
+          actionKey: "get-floatingip"
+          actionType: "operation"
+          index: 1
+        -
+          actionKey: "kill-process"
+          actionType: "attacker"
+          index: 2
+
+        -
+          actionKey: "monitor-recovery"
+          actionType: "monitor"
+          index: 3
+
+        -
+          actionKey: "server-status"
+          actionType: "monitor"
+          index: 4
+
+    nodes:
+      controller_node: controller_node.LF
+    runner:
+      type: Duration
+      duration: 1
+
+contexts:
+-
+  type: Node
+  name: LF
+  file: {{file}}
+
+-
+  name: touchstone_tc058
+  user: ubuntu
+
+  servers:
+    host:
+      image: {{HOST_IMAGE}}
+      flavor: {{HOST_FLAVOR}}
+      {% if FLOATING_IP_CREATION_SUPPORT %}
+      floating_ip: true
+      {% endif %}
+      {% if HOST_AVAILABILITY_ZONE %}
+      availability_zone: {{HOST_AVAILABILITY_ZONE}}
+      {% endif %}
+  networks:
+    test:
+      cidr: '10.0.1.0/24'
+      vnic_type: {{VNIC_TYPE}}

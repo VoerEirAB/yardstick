@@ -1,0 +1,73 @@
+---
+
+schema: "yardstick:task:0.1"
+description: >
+    Yardstick TC089 config file;
+    HA test case: Control node Openstack service down - nova conductor
+
+{% set selection = ['0', '1' ,'2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'] %}
+{% macro random_suffix() %}{% for n in range(0,12) %}{{ selection|random }}{% endfor %}{% endmacro %}
+# instance params takes flavor name instead of flavor details
+{% if HOST_FLAVOR is mapping %}
+  {% set HOST_FLAVOR = HOST_FLAVOR_NAME %}
+{% endif %}
+
+{% set file = file or 'pod.yaml' %}
+{% set ATTACK_PROCESS = "nova-conductor" %}
+{% set INSTANCE_NAME = "touchstone_tc089-"~random_suffix() %}
+{% set INSTANCE_PARAMS = [INSTANCE_NAME, HOST_IMAGE, HOST_FLAVOR, SSH_NET_NAME] %}
+
+scenarios:
+  -
+    type: "GeneralHA"
+    options:
+      attackers:
+        -
+          fault_type: "kill-process"
+          host: controller_node
+          key: "kill-process"
+          process_name: "{{ ATTACK_PROCESS }}"
+
+      monitors:
+        -
+          monitor_type: "process"
+          key: "service-status"
+          process_name: "{{ ATTACK_PROCESS }}"
+          host: controller_node
+          monitor_time: {{MONITOR_TIME}}
+          monitor_number: 3
+
+      operations:
+        -
+          operation_type: "general-operation"
+          key: "nova-create-instance"
+          operation_key: "nova-create-instance"
+          action_parameter:
+            serverconfig: {{INSTANCE_PARAMS|join(' ')}}
+          rollback_parameter:
+            serverconfig: {{INSTANCE_NAME}}
+
+      steps:
+        -
+          actionKey: "kill-process"
+          actionType: "attacker"
+          index: 1
+        -
+          actionKey: "service-status"
+          actionType: "monitor"
+          index: 2
+        -
+          actionKey: "nova-create-instance"
+          actionType: "operation"
+          index: 3
+
+    nodes:
+      controller_node: controller_node.LF
+    runner:
+      type: Duration
+      duration: 1
+
+context:
+  type: Node
+  name: LF
+  file: {{file}}
