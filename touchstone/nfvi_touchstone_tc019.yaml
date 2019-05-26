@@ -9,9 +9,8 @@ description: >
 {% set file = file or 'pod.yaml' %}
 
 # setting SLA
-{% set TC019_OUTAGE_TIME = TC019_OUTAGE_TIME or false %}
-{% set TC019_MAX_OUTAGE_TIME = TC019_MAX_OUTAGE_TIME or MONITOR_TIME_OUTAGE %}
-{% set TC019_MAX_RECOVERY_TIME = TC019_MAX_RECOVERY_TIME or MONITOR_TIME_RECOVERY %}
+{% set TC019_MAX_OUTAGE_TIME = TC019_MAX_OUTAGE_TIME or false %}
+{% set TC019_MAX_RECOVERY_TIME = TC019_MAX_RECOVERY_TIME or false %}
 
 scenarios:
 -
@@ -28,15 +27,19 @@ scenarios:
       command_name: "openstack image list"
       monitor_time: {{MONITOR_TIME_OUTAGE}}
       monitor_number: 3
+      {% if TC019_MAX_OUTAGE_TIME %}
       sla:
         max_outage_time: {{TC019_MAX_OUTAGE_TIME}}
+      {% endif %}
     - monitor_type: "process"
       process_name: "nova-api"
       host: controller_node
       monitor_time: {{MONITOR_TIME_RECOVERY}}
       monitor_number: 3
+      {% if TC019_MAX_RECOVERY_TIME %}
       sla:
         max_recover_time: {{TC019_MAX_RECOVERY_TIME}}
+      {% endif %}
 
   nodes:
     controller_node: controller_node.LF
@@ -45,9 +48,8 @@ scenarios:
     type: Iteration
     iterations: 1
 
-  {% if TC019_OUTAGE_TIME %}
+  {% if TC019_MAX_OUTAGE_TIME or TC019_MAX_RECOVERY_TIME %}
   sla:
-    outage_time: {{ TC019_OUTAGE_TIME }}
     action: monitor
   {% endif %}
 

@@ -9,6 +9,7 @@ description: >
 
 # setting SLA
 {% set TC053_MAX_OUTAGE_TIME = TC053_MAX_OUTAGE_TIME or false %}
+{% set TC053_MAX_RECOVERY_TIME = TC053_MAX_RECOVERY_TIME or false %}
 
 scenarios:
   -
@@ -29,8 +30,10 @@ scenarios:
           host: controller_node
           monitor_time: {{MONITOR_TIME}}
           monitor_number: 3
+          {% if TC053_MAX_RECOVERY_TIME %}
           sla:
-            max_recover_time: {{RECOVERY_TIME}}
+            max_recover_time: {{TC053_MAX_RECOVERY_TIME}}
+          {% endif %}
 
         -
           monitor_type: "openstack-cmd"
@@ -38,8 +41,10 @@ scenarios:
           command_name: "openstack image list"
           monitor_time: {{MONITOR_TIME}}
           monitor_number: 3
+          {% if TC053_MAX_OUTAGE_TIME %}
           sla:
-            max_outage_time: {{OUTAGE_TIME}}
+            max_outage_time: {{TC053_MAX_OUTAGE_TIME}}
+          {% endif %}
 
       steps:
         -
@@ -60,9 +65,8 @@ scenarios:
     runner:
       type: Duration
       duration: 1
-    {% if TC053_MAX_OUTAGE_TIME %}
+    {% if TC053_MAX_OUTAGE_TIME or TC053_MAX_RECOVERY_TIME %}
     sla:
-      max_outage_time: {{ TC053_MAX_OUTAGE_TIME }}
       action: monitor
     {% endif %}
 

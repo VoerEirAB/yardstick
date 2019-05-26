@@ -28,8 +28,10 @@ scenarios:
           command_name: "openstack image list"
           monitor_time: {{MONITOR_TIME}}
           monitor_number: 3
+          {% if TC051_MAX_OUTAGE_TIME %}
           sla:
-            max_outage_time: {{OUTAGE_TIME}}
+            max_outage_time: {{TC051_MAX_OUTAGE_TIME}}
+          {% endif %}
 
         -
           monitor_type: "openstack-cmd"
@@ -37,8 +39,10 @@ scenarios:
           command_name: "openstack router list"
           monitor_time: {{MONITOR_TIME}}
           monitor_number: 3
+          {% if TC051_MAX_OUTAGE_TIME %}
           sla:
-            max_outage_time: {{OUTAGE_TIME}}
+            max_outage_time: {{TC051_MAX_OUTAGE_TIME}}
+          {% endif %}
 
         -
           monitor_type: "openstack-cmd"
@@ -46,8 +50,10 @@ scenarios:
           command_name: "openstack stack list"
           monitor_time: {{MONITOR_TIME}}
           monitor_number: 3
+          {% if TC051_MAX_OUTAGE_TIME %}
           sla:
-            max_outage_time: {{OUTAGE_TIME}}
+            max_outage_time: {{TC051_MAX_OUTAGE_TIME}}
+          {% endif %}
 
         -
           monitor_type: "openstack-cmd"
@@ -55,8 +61,10 @@ scenarios:
           command_name: "openstack volume list"
           monitor_time: {{MONITOR_TIME}}
           monitor_number: 3
+          {% if TC051_MAX_OUTAGE_TIME %}
           sla:
-            max_outage_time: {{OUTAGE_TIME}}
+            max_outage_time: {{TC051_MAX_OUTAGE_TIME}}
+          {% endif %}
 
 
       steps:
@@ -93,7 +101,6 @@ scenarios:
       duration: 1
     {% if TC051_MAX_OUTAGE_TIME %}
     sla:
-      max_outage_time: {{ TC051_MAX_OUTAGE_TIME }}
       action: monitor
     {% endif %}
 

@@ -9,6 +9,7 @@ description: >
 {% set ATTACK_PROCESS = ATTACK_PROCESS or "heat-api" %}
 
 {% set TC091_MAX_OUTAGE_TIME = TC091_MAX_OUTAGE_TIME or false %}
+{% set TC091_MAX_RECOVERY_TIME = TC091_MAX_RECOVERY_TIME or false %}
 
 scenarios:
 -
@@ -33,6 +34,10 @@ scenarios:
       host: controller_node
       monitor_time: {{MONITOR_TIME}}
       monitor_number: 3
+      {% if TC091_MAX_RECOVERY_TIME %}
+      sla:
+        max_recover_time: {{TC091_MAX_RECOVERY_TIME}}
+      {% endif %}
 
   nodes:
     controller_node: controller_node.LF
@@ -40,9 +45,10 @@ scenarios:
   runner:
     type: Duration
     duration: 1
+  {% if TC091_MAX_OUTAGE_TIME or TC091_MAX_RECOVERY_TIME %}
   sla:
-    outage_time: 5
     action: monitor
+  {% endif %}
 
 
 context:

@@ -10,8 +10,6 @@ description: >
 {% set vip_public = vip_public or '172.16.0.3' %}
 {% set vip_router_management = vip_router_management or '192.168.0.1' %}
 {% set vip_router_public = vip_router_public or '172.16.0.2' %}
-{% set MONITOR_TIME = MONITOR_TIME or 10 %}
-{% set OUTAGE_TIME = OUTAGE_TIME or 5 %}
 
 # setting SLA
 {% set TC054_MAX_OUTAGE_TIME = TC054_MAX_OUTAGE_TIME or false %}
@@ -33,8 +31,10 @@ scenarios:
           command_name: "openstack image list"
           monitor_time: {{MONITOR_TIME}}
           monitor_number: 3
+          {% if TC054_MAX_OUTAGE_TIME %}
           sla:
-            max_outage_time: {{OUTAGE_TIME}}
+            max_outage_time: {{TC054_MAX_OUTAGE_TIME}}
+          {% endif %}
 
         -
           monitor_type: "general-monitor"
@@ -43,8 +43,10 @@ scenarios:
           host: host_compute_node
           monitor_time: {{MONITOR_TIME}}
           monitor_number: 3
+          {% if TC054_MAX_OUTAGE_TIME %}
           sla:
-            max_outage_time: {{OUTAGE_TIME}}
+            max_outage_time: {{TC054_MAX_OUTAGE_TIME}}
+          {% endif %}
           parameter:
             ip_address: {{vip_management}}
 
@@ -55,8 +57,10 @@ scenarios:
           host: host_compute_node
           monitor_time: {{MONITOR_TIME}}
           monitor_number: 3
+          {% if TC054_MAX_OUTAGE_TIME %}
           sla:
-            max_outage_time: {{OUTAGE_TIME}}
+            max_outage_time: {{TC054_MAX_OUTAGE_TIME}}
+          {% endif %}
           parameter:
             ip_address: {{vip_router_public}}
 
@@ -67,8 +71,10 @@ scenarios:
           host: host_compute_node
           monitor_time: {{MONITOR_TIME}}
           monitor_number: 3
+          {% if TC054_MAX_OUTAGE_TIME %}
           sla:
-            max_outage_time: {{OUTAGE_TIME}}
+            max_outage_time: {{TC054_MAX_OUTAGE_TIME}}
+          {% endif %}
           parameter:
             ip_address: {{vip_router_management}}
 
@@ -79,8 +85,10 @@ scenarios:
           host: host_compute_node
           monitor_time: {{MONITOR_TIME}}
           monitor_number: 3
+          {% if TC054_MAX_OUTAGE_TIME %}
           sla:
-            max_outage_time: {{OUTAGE_TIME}}
+            max_outage_time: {{TC054_MAX_OUTAGE_TIME}}
+          {% endif %}
           parameter:
             ip_address: {{vip_public}}
 
@@ -123,7 +131,6 @@ scenarios:
       duration: 1
     {% if TC054_MAX_OUTAGE_TIME %}
     sla:
-      max_outage_time: {{ TC054_MAX_OUTAGE_TIME }}
       action: monitor
     {% endif %}
 

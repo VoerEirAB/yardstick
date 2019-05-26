@@ -28,8 +28,10 @@ scenarios:
           command_name: "openstack flavor list"
           monitor_time: {{MONITOR_TIME}}
           monitor_number: 3
+          {% if TC052_MAX_OUTAGE_TIME %}
           sla:
-            max_outage_time: {{OUTAGE_TIME}}
+            max_outage_time: {{TC052_MAX_OUTAGE_TIME}}
+          {% endif %}
 
       operations:
         -
@@ -77,7 +79,6 @@ scenarios:
       duration: 1
     {% if TC052_MAX_OUTAGE_TIME %}
     sla:
-      max_outage_time: {{ TC052_MAX_OUTAGE_TIME }}
       action: monitor
     {% endif %}
 
