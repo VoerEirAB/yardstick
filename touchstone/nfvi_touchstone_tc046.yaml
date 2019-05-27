@@ -10,6 +10,7 @@ description: >
 
 # setting SLA
 {% set TC046_MAX_OUTAGE_TIME = TC046_MAX_OUTAGE_TIME or false %}
+{% set TC046_MAX_RECOVERY_TIME = TC046_MAX_RECOVERY_TIME or false %}
 
 scenarios:
 -
@@ -25,15 +26,19 @@ scenarios:
       command_name: "openstack user list"
       monitor_time: {{MONITOR_TIME}}
       monitor_number: 3
+      {% if TC046_MAX_OUTAGE_TIME %}
       sla:
-        max_outage_time: {{OUTAGE_TIME}}
+        max_outage_time: {{TC046_MAX_OUTAGE_TIME}}
+      {% endif %}
     - monitor_type: "process"
       process_name: {{ATTACK_PROCESS}}
       host: controller_node
       monitor_time: {{MONITOR_TIME}}
       monitor_number: 3
+      {% if TC046_MAX_RECOVERY_TIME %}
       sla:
-        max_recover_time: {{RECOVERY_TIME}}
+        max_recover_time: {{TC046_MAX_RECOVERY_TIME}}
+      {% endif %}
 
   nodes:
     controller_node: controller_node.LF
@@ -41,9 +46,8 @@ scenarios:
   runner:
     type: Duration
     duration: 1
-  {% if TC046_MAX_OUTAGE_TIME %}
+  {% if TC046_MAX_OUTAGE_TIME or TC046_MAX_RECOVERY_TIME %}
   sla:
-    outage_time: {{ TC046_MAX_OUTAGE_TIME }}
     action: monitor
   {% endif %}
 

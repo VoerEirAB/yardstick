@@ -7,6 +7,9 @@ description: >
     IP datagram error rate, ICMP message error rate, TCP segment error rate and
     UDP datagram error rate.
 
+# setting SLA
+{% set TC076_IP_DATAGRAM_ERROR_RATE = TC076_IP_DATAGRAM_ERROR_RATE or false %}
+
 {# -- Unused for touchstone as of now -- #}
 {% set provider = provider or false %}
 {% set physical_network = physical_network or none %}
@@ -34,9 +37,11 @@ scenarios:
     type: Iteration
     iterations: 1
 
+  {% if TC076_IP_DATAGRAM_ERROR_RATE %}
   sla:
-    IP_datagram_error_rate: 0.01
+    IP_datagram_error_rate: {{TC076_IP_DATAGRAM_ERROR_RATE}}
     action: monitor
+  {% endif %}
 
 context:
   name: touchstone_tc076

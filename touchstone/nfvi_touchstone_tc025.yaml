@@ -23,29 +23,37 @@ scenarios:
       command_name: "openstack image list"
       monitor_time: {{MONITOR_TIME}}
       monitor_number: 3
+      {% if TC025_MAX_OUTAGE_TIME %}
       sla:
-        max_outage_time: {{OUTAGE_TIME}}
+        max_outage_time: {{TC025_MAX_OUTAGE_TIME}}
+      {% endif %}
 
     - monitor_type: "openstack-cmd"
       command_name: "openstack router list"
       monitor_time: {{MONITOR_TIME}}
       monitor_number: 3
+      {% if TC025_MAX_OUTAGE_TIME %}
       sla:
-        max_outage_time: {{OUTAGE_TIME}}
+        max_outage_time: {{TC025_MAX_OUTAGE_TIME}}
+      {% endif %}
 
     - monitor_type: "openstack-cmd"
       command_name: "openstack stack list"
       monitor_time: {{MONITOR_TIME}}
       monitor_number: 3
+      {% if TC025_MAX_OUTAGE_TIME %}
       sla:
-        max_outage_time: {{OUTAGE_TIME}}
+        max_outage_time: {{TC025_MAX_OUTAGE_TIME}}
+      {% endif %}
 
     - monitor_type: "openstack-cmd"
       command_name: "openstack volume list"
       monitor_time: {{MONITOR_TIME}}
       monitor_number: 3
+      {% if TC025_MAX_OUTAGE_TIME %}
       sla:
-        max_outage_time: {{OUTAGE_TIME}}
+        max_outage_time: {{TC025_MAX_OUTAGE_TIME}}
+      {% endif %}
 
   nodes:
     controller_node: controller_node.LF
@@ -53,13 +61,10 @@ scenarios:
   runner:
     type: Iteration
     iterations: 1
-
   {% if TC025_MAX_OUTAGE_TIME %}
   sla:
-    outage_time: {{ TC025_MAX_OUTAGE_TIME }}
     action: monitor
   {% endif %}
-
 
 context:
   type: Node

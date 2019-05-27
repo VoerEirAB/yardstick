@@ -67,6 +67,10 @@ scenarios:
   runner:
     type: Duration
     duration: 1
+  {% if TC056_MAX_OUTAGE_TIME %}
+  sla:
+    action: monitor
+  {% endif %}
 
 
 context:

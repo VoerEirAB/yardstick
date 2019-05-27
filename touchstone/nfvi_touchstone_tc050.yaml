@@ -32,36 +32,40 @@ scenarios:
           command_name: "openstack image list"
           monitor_time: {{MONITOR_TIME}}
           monitor_number: 3
+          {% if TC050_MAX_OUTAGE_TIME %}
           sla:
-            max_outage_time: {{OUTAGE_TIME}}
-
+            max_outage_time: {{TC050_MAX_OUTAGE_TIME}}
+          {% endif %}
         -
           monitor_type: "openstack-cmd"
           key: "neutron-router-list"
           command_name: "openstack router list"
           monitor_time: {{MONITOR_TIME}}
           monitor_number: 3
+          {% if TC050_MAX_OUTAGE_TIME %}
           sla:
-            max_outage_time: {{OUTAGE_TIME}}
-
+            max_outage_time: {{TC050_MAX_OUTAGE_TIME}}
+          {% endif %}
         -
           monitor_type: "openstack-cmd"
           key: "heat-stack-list"
           command_name: "openstack stack list"
           monitor_time: {{MONITOR_TIME}}
           monitor_number: 3
+          {% if TC050_MAX_OUTAGE_TIME %}
           sla:
-            max_outage_time: {{OUTAGE_TIME}}
-
+            max_outage_time: {{TC050_MAX_OUTAGE_TIME}}
+          {% endif %}
         -
           monitor_type: "openstack-cmd"
           key: "cinder-list"
           command_name: "openstack volume list"
           monitor_time: {{MONITOR_TIME}}
           monitor_number: 3
+          {% if TC050_MAX_OUTAGE_TIME %}
           sla:
-            max_outage_time: {{OUTAGE_TIME}}
-
+            max_outage_time: {{TC050_MAX_OUTAGE_TIME}}
+          {% endif %}
 
       steps:
         -
@@ -98,7 +102,6 @@ scenarios:
       duration: 1
     {% if TC050_MAX_OUTAGE_TIME %}
     sla:
-      outage_time: {{ TC050_MAX_OUTAGE_TIME }}
       action: monitor
     {% endif %}
 
