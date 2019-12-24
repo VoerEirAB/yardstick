@@ -295,6 +295,10 @@ class Pktgen(base.Scenario):
         else:
             duration = 20
 
+        # updating ssh time out depending upon duration, if we want to run
+        # pkgten for more duration than default value(60) of SSH_TIMEOUT
+        ssh_timeout = SSH_TIMEOUT + duration
+
         self._iptables_setup()
 
         queue_number = self.queue_number
@@ -311,7 +315,7 @@ class Pktgen(base.Scenario):
 
         LOG.debug("Executing command: %s", cmd)
         _, stdout, _ = self.client.execute(cmd, raise_on_error=True,
-                                           timeout=SSH_TIMEOUT)
+                                           timeout=ssh_timeout)
 
         result.update(jsonutils.loads(stdout))
 
