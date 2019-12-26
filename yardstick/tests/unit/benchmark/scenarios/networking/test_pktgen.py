@@ -451,3 +451,33 @@ class PktgenTestCase(unittest.TestCase):
         expected_result["packets_received"] = 149300
         expected_result["packetsize"] = 60
         self.assertEqual(result, expected_result)
+
+    def test_run_with_duration_greater_than_ssh_timeout(self):
+        scenario_cfg = {
+            'options': {
+                'packetsize': 60,
+                'number_of_ports': 10,
+                'duration': 70},
+            'sla': {'max_ppm': 1}
+        }
+        scenario = pktgen.Pktgen(scenario_cfg, self.context_cfg)
+        scenario.setup()
+        scenario.client = self.mock_SSH.from_node()
+        scenario._get_vnic_driver_name = mock.Mock(return_value="ixgbevf")
+        scenario._get_sriov_queue_number = mock.Mock(return_value=2)
+        scenario._setup_irqmapping_sriov = mock.Mock()
+        scenario._iptables_get_result = mock.Mock(return_value=149300)
+
+        sample_output = jsonutils.dumps({"packets_per_second": 9753,
+                                         "errors": 0,
+                                         "packets_sent": 149300,
+                                         "flows": 110,
+                                         "ppm": 0})
+        self.mock_SSH.from_node().execute.return_value = (0, sample_output, '')
+
+        result = {}
+        scenario.run(result)
+        # ssh_timeout is 130 => default_ssh_timeout(60s) + duration(70s)
+        self.scenario.client.execute.assert_called_with(
+            'sudo bash pktgen.sh 172.16.0.138 10 60 70 1 1000000',
+            raise_on_error=True, timeout=130)
