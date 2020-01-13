@@ -6,7 +6,11 @@ nodes:
     role: Controller
     ip: {{ CONTROLLER_IP }}
     user: {{ CONTROLLER_USER }}
-    key_filename: /root/.ssh/id_rsa
+    key_filename: /root/.ssh/id_rsa {% if CONTROLLER_IPMI and CONTROLLER_IPMI_USER %}
+    ipmi_ip: {{ CONTROLLER_IPMI }}
+    ipmi_user: {{ CONTROLLER_IPMI_USER }}
+    ipmi_password: {{ CONTROLLER_IPMI_PASSWORD }}
+    {% endif %}
   {% endif %}
 
   {% if HOST_IP and HOST_USER %}
