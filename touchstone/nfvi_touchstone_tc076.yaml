@@ -10,6 +10,9 @@ description: >
 # setting SLA
 {% set TC076_IP_DATAGRAM_ERROR_RATE = TC076_IP_DATAGRAM_ERROR_RATE or false %}
 
+# Security Group configuration
+{% set SECURITY_GROUP = SECURITY_GROUP or false %}
+
 {# -- Unused for touchstone as of now -- #}
 {% set provider = provider or false %}
 {% set physical_network = physical_network or none %}
@@ -49,6 +52,11 @@ context:
   placement_groups:
     pgrp1:
       policy: {{PG_POLICY}}
+
+  {% if SECURITY_GROUP %}
+  security_group:
+    rules: {{ SECURITY_GROUP }}
+  {% endif %}
 
   servers:
     host:

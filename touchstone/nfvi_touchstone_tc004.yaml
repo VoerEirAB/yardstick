@@ -2,6 +2,9 @@
 # Sample benchmark task config file
 # Reading cache hit/miss ratio and usage statistics
 
+# Security Group configuration
+{% set SECURITY_GROUP = SECURITY_GROUP or false %}
+
 schema: "yardstick:task:0.1"
 
 scenarios:
@@ -18,6 +21,11 @@ scenarios:
 context:
   name: touchstone_tc004
   user: ubuntu
+
+  {% if SECURITY_GROUP %}
+  security_group:
+    rules: {{ SECURITY_GROUP }}
+  {% endif %}
 
   servers:
     host:

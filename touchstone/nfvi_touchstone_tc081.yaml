@@ -14,6 +14,8 @@ description: >
     Yardstick TC081 config file;
     measure network latency between container and VM using ping;
 
+# Security Group configuration
+{% set SECURITY_GROUP = SECURITY_GROUP or false %}
 
 scenarios:
 -
@@ -37,6 +39,11 @@ contexts:
 -
   type: Kubernetes
   name: k8s_tc081
+
+  {% if SECURITY_GROUP %}
+  security_group:
+    rules: {{ SECURITY_GROUP }}
+  {% endif %}
 
   servers:
     host:

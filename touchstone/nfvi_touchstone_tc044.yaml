@@ -4,6 +4,9 @@
 
 schema: "yardstick:task:0.1"
 
+# Security Group configuration
+{% set SECURITY_GROUP = SECURITY_GROUP or false %}
+
 scenarios:
 -
   type: MEMORYload
@@ -20,6 +23,11 @@ scenarios:
 context:
   name: touchstone_tc044
   user: ubuntu
+
+  {% if SECURITY_GROUP %}
+  security_group:
+    rules: {{ SECURITY_GROUP }}
+  {% endif %}
 
   servers:
     host:

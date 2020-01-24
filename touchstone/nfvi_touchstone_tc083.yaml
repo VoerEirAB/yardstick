@@ -13,6 +13,9 @@ description: >
     Yardstick TC083 config file;
     Measure network latency and throughput using netperf.
 
+# Security Group configuration
+{% set SECURITY_GROUP = SECURITY_GROUP or false %}
+
 {# -- Unused for touchstone as of now -- #}
 {% set provider = provider or false %}
 {% set physical_network = physical_network or none %}
@@ -70,6 +73,11 @@ context:
   placement_groups:
     pgrp1:
       policy: {{PG_POLICY}}
+
+  {% if SECURITY_GROUP %}
+  security_group:
+    rules: {{ SECURITY_GROUP }}
+  {% endif %}
 
   servers:
     host:
