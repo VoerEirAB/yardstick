@@ -10,6 +10,9 @@ description: >
 # setting SLA
 {% set TC069_MIN_BANDWIDTH = TC069_MIN_BANDWIDTH or false %}
 
+# Security Group configuration
+{% set SECURITY_GROUP = SECURITY_GROUP or false %}
+
 {# -- Unused for touchstone as of now -- #}
 {% set provider = provider or false %}
 {% set physical_network = physical_network or none %}
@@ -41,6 +44,11 @@ scenarios:
 context:
   name: touchstone_tc069
   user: ubuntu
+
+  {% if SECURITY_GROUP %}
+  security_group:
+    rules: {{ SECURITY_GROUP }}
+  {% endif %}
 
   servers:
     host:

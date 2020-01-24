@@ -20,6 +20,9 @@ description: >
 {% set TC006_WRITE_IOPS = TC006_WRITE_IOPS or false %}
 {% set TC006_WRITE_LAT = TC006_WRITE_LAT or false %}
 
+# Security Group configuration
+{% set SECURITY_GROUP = SECURITY_GROUP or false %}
+
 {# -- Unused for touchstone as of now -- #}
 {% set provider = provider or none %}
 {% set physical_network = physical_network or 'physnet1' %}
@@ -69,6 +72,12 @@ scenarios:
 context:
   name: touchstone_tc006
   user: ubuntu
+
+  {% if SECURITY_GROUP %}
+  security_group:
+    rules: {{ SECURITY_GROUP }}
+  {% endif %}
+
   servers:
     host:
       image: {{HOST_IMAGE}}
