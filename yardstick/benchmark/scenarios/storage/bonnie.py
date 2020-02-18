@@ -93,5 +93,5 @@ class Bonnie(base.Scenario):
         LOG.debug("Generating Bonnie++ HTML report...")
         with open("/tmp/bonnie.html", "w") as bon_file:
             p = subprocess.Popen(["bon_csv2html"], stdout=bon_file, stdin=subprocess.PIPE)
-            p.communicate(raw_data)
+            p.communicate(raw_data.encode())
         LOG.info('Bonnie++ benchmark completed, please find benchmark report at /tmp/bonnie.html')

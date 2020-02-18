@@ -7,72 +7,144 @@
 # http://www.apache.org/licenses/LICENSE-2.0
 ##############################################################################
 
-Babel==2.3.4            # BSD; OSI Approved  BSD License
-Jinja2==2.9.6           # BSD; OSI Approved  BSD License
-SQLAlchemy==1.1.12      # MIT License; OSI Approved  MIT License
-PTable==0.9.2           # BSD (3 clause); OSI Approved  BSD License
-#ansible==2.5.5          # GPLv3; OSI Approved  GNU General Public License v3 or later (GPLv3+)
-backport-ipaddress==0.1; python_version <= "2.7"    # OSI Approved  Python Software Foundation License
-chainmap==1.0.2         # Python Software Foundation License; OSI Approved  Python Software Foundation License
-cmd2==0.8.6             # MIT License; OSI Approved  MIT License
-more-itertools==5.0.0   # supports python_version >=2.7
-zipp==1.0.0             # supports python_version >=2.7
-cachetools==3.1.1       # supports python_version >=2.7
-setuptools==42.0.2      # supports python_version >=2.7
-django==1.8.17          # BSD; OSI Approved  BSD License
-                        # NOTE(ralonsoh): django must be bumped to 1.11.8; consider the migration notes [1]
-                        # [1] https://docs.djangoproject.com/ja/1.11/ref/templates/upgrading/
-docker-py==1.10.6       # OSI Approved  Apache Software License
-extras==1.0.0           # OSI Approved  MIT License
-flasgger==0.5.13        # MIT
-flask-restful-swagger==0.19 # MIT
-flask-restful==0.3.5    # BSD; OSI Approved  BSD License
-flask==0.11.1           # BSD; OSI Approved  BSD License
-functools32==3.2.3.post2; python_version <= "2.7"    # PSF license
-futures==3.1.1;python_version=='2.7'    # BSD; OSI Approved  BSD License
-influxdb==4.1.1         # MIT License; OSI Approved  MIT License
-IxNetwork==8.40.1124.9  # MIT License; OSI Approved  MIT License
-jinja2schema==0.1.4     # OSI Approved  BSD License
-keystoneauth1==3.3.0    # OSI Approved  Apache Software License
-kubernetes==6.0.0       # OSI Approved  Apache Software License
-mock==2.0.0             # OSI Approved  BSD License; `BSD License`_; http://github.com/testing-cabal/mock/blob/master/LICENSE.txt
-msgpack-python==0.4.8   # OSI Approved  Apache Software License
-netaddr==0.7.19         # BSD License; OSI Approved  BSD License; OSI Approved  MIT License
-netifaces==0.10.6       # MIT License; OSI Approved  MIT License
-os-client-config==1.28.0    # OSI Approved  Apache Software License
-osc-lib==1.8.0          # OSI Approved  Apache Software License
-oslo.log==3.41.0        # OSI Approved  Apache Software License
-oslo.config==5.1.0      # OSI Approved  Apache Software License
-oslo.i18n==3.17.0       # OSI Approved  Apache Software License
-oslo.messaging==5.36.0 # OSI Approved  Apache Software License
-oslo.privsep==1.23.0   # OSI Approved  Apache Software License
-oslo.serialization==2.20.1  # OSI Approved  Apache Software License
-oslo.utils==3.33.0      # OSI Approved  Apache Software License
-paramiko==2.2.1         # LGPL; OSI Approved  GNU Library or Lesser General Public License (LGPL)
-pbr==3.1.1              # OSI Approved  Apache Software License; Apache License, Version 2.0
-pika==0.10.0            # BSD; OSI Approved  BSD License
-pip==9.0.1              # MIT
-positional==1.1.2       # OSI Approved  Apache Software License
-pycrypto==2.6.1         # Public Domain
-pyparsing==2.2.0        # MIT License; OSI Approved  MIT License
-pyroute2==0.4.21        # dual license GPLv2+ and Apache v2; OSI Approved  GNU General Public License v2 or later (GPLv2+); OSI Approved  Apache Software License
-pyrsistent==0.14.1      # LICENSE.mit; OSI Approved  MIT License
-python-cinderclient==3.3.0      # OSI Approved  Apache Software License
-python-glanceclient==2.8.0      # OSI Approved  Apache Software License
-python-keystoneclient==3.13.0   # OSI Approved  Apache Software License
-python-neutronclient==6.5.0     # OSI Approved  Apache Software License
-python-novaclient==9.1.1        # OSI Approved  Apache Software License
-pyzmq==16.0.2           # LGPL+BSD; OSI Approved  GNU Library or Lesser General Public License (LGPL); OSI Approved  BSD License
-requests==2.14.2        # Apache 2.0; OSI Approved  Apache Software License
-requestsexceptions==1.3.0   # OSI Approved  Apache Software License
-scp==0.10.2             # LGPL
-shade==1.22.2           # OSI Approved  Apache Software License
-simplejson==3.13.2      # MIT License; OSI Approved  MIT License; OSI Approved  Academic Free License (AFL)
-six==1.10.0             # MIT; OSI Approved  MIT License
-stevedore==1.25.0       # OSI Approved  Apache Software License
-traceback2==1.4.0       # OSI Approved  Python Software Foundation License
-unicodecsv==0.14.1      # BSD License; OSI Approved  BSD License
-wrapt==1.10.10          # BSD
-
-# YS needs advanced openstack client
-python-openstackclient==3.18.0
+amqp==2.5.2
+aniso8601==8.0.0
+ansible==2.9.4
+appdirs==1.4.3
+asgiref==3.2.3
+attrs==19.3.0
+Babel==2.8.0
+backports.ssl==0.0.9
+bcrypt==3.1.7
+cachetools==4.0.0
+certifi==2019.11.28
+cffi==1.14.0
+chainmap==1.0.3
+chardet==3.0.4
+Click==7.0
+cliff==2.18.0
+cmd2==0.8.9
+cryptography==2.8
+debtcollector==2.0.0
+decorator==4.4.1
+Django==3.0.3
+dnspython==1.16.0
+docker-py==1.10.6
+docker-pycreds==0.4.0
+dogpile.cache==0.9.0
+eventlet==0.25.1
+extras==1.0.0
+fasteners==0.15
+fixtures==3.0.0
+flasgger==0.9.4
+Flask==1.1.1
+Flask-RESTful==0.3.8
+flask-restful-swagger==0.20.1
+futurist==2.0.0
+google-auth==1.11.0
+greenlet==0.4.15
+idna==2.8
+importlib-metadata==1.5.0
+influxdb==5.2.3
+iso8601==0.1.12
+itsdangerous==1.1.0
+IxNetwork==9.0.1915.16
+Jinja2==2.11.1
+jinja2schema==0.1.4
+jmespath==0.9.4
+jsonpatch==1.25
+jsonpointer==2.0
+jsonrpclib-pelix==0.4.0
+jsonschema==3.2.0
+keystoneauth1==3.18.0
+kombu==4.6.7
+kubernetes==10.0.1
+linecache2==1.0.0
+MarkupSafe==1.1.1
+mistune==0.8.4
+mock==4.0.1
+monotonic==1.5
+msgpack==0.6.2
+msgpack-python==0.5.6
+munch==2.5.0
+netaddr==0.7.19
+netifaces==0.10.9
+oauthlib==3.1.0
+openstacksdk==0.41.0
+os-client-config==2.0.0
+os-service-types==1.7.0
+osc-lib==2.0.0
+oslo.concurrency==4.0.0
+oslo.config==8.0.0
+oslo.context==3.0.0
+oslo.i18n==3.25.1
+oslo.log==4.0.0
+oslo.messaging==11.0.0
+oslo.middleware==4.0.0
+oslo.privsep==1.34.0
+oslo.serialization==3.0.0
+oslo.service==2.0.0
+oslo.utils==4.0.0
+paramiko==2.7.1
+Paste==3.3.0
+PasteDeploy==2.1.0
+pbr==5.4.4
+pika==1.1.0
+positional==1.2.1
+prettytable==0.7.2
+PTable==0.9.2
+pyasn1==0.4.8
+pyasn1-modules==0.2.8
+pycparser==2.19
+pycrypto==2.6.1
+pyinotify==0.9.6
+PyNaCl==1.3.0
+pyOpenSSL==19.1.0
+pyparsing==2.4.6
+pyperclip==1.7.0
+pyroute2==0.5.7
+pyrsistent==0.15.7
+python-cinderclient==5.0.0
+python-dateutil==2.8.1
+python-glanceclient==2.17.0
+python-keystoneclient==3.22.0
+python-mimeparse==1.6.0
+python-neutronclient==7.0.0
+python-novaclient==16.0.0
+python-openstackclient==4.0.0
+pytz==2019.3
+PyYAML==5.3
+pyzmq==18.1.1
+repoze.lru==0.7
+requests==2.22.0
+requests-oauthlib==1.3.0
+requestsexceptions==1.4.0
+rfc3986==1.3.2
+Routes==2.4.1
+rsa==4.0
+scapy==2.4.3
+scp==0.13.2
+shade==1.33.0
+simplejson==3.17.0
+simpy==3.0.11
+six==1.14.0
+SQLAlchemy==1.3.13
+sqlparse==0.3.0
+statsd==3.3.0
+stevedore==1.32.0
+testtools==2.3.0
+texttable==1.6.2
+traceback2==1.4.0
+trex-stl-lib==0.3
+unittest2==1.1.0
+urllib3==1.25.8
+vine==1.3.0
+virtualenv==16.7.9
+warlock==1.3.3
+wcwidth==0.1.8
+WebOb==1.8.6
+websocket-client==0.57.0
+Werkzeug==1.0.0
+wrapt==1.11.2
+yappi==1.2.3
+zipp==2.2.0

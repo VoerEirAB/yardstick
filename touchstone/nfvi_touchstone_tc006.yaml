@@ -89,7 +89,7 @@ context:
       availability_zone: {{HOST_AVAILABILITY_ZONE}}
       {% endif %}
       volume:
-        name: touchstone_tc006-random_suffix()-volume
+        name: "touchstone_tc006-volume"~random_suffix()
         size: {{HOST_ATTACHED_VOLUME_SIZE}}
       volume_mountpoint: /dev/vdb
 
