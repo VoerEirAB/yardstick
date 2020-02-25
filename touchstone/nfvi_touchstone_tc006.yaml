@@ -7,6 +7,8 @@ description: >
 
 {% set selection = ['0', '1' ,'2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'] %}
 {% macro random_suffix() %}{% for n in range(0,12) %}{{ selection|random }}{% endfor %}{% endmacro %}
+#setting volume name
+{% set HOST_VOLUME_NAME = "touchstone_tc006-volume-"~random_suffix() %}
 
 
 {% set job_file_config = job_file_config or '["[random-writers]", ioengine='~IOENGINE~', rw='~OPERATION_MODE~', size='~SIZE~'m, bs='~BLOCK_SIZE~'k, direct=0, numjobs='~NO_OF_JOBS~']' %}
@@ -89,7 +91,7 @@ context:
       availability_zone: {{HOST_AVAILABILITY_ZONE}}
       {% endif %}
       volume:
-        name: "touchstone_tc006-volume"~random_suffix()
+        name: {{HOST_VOLUME_NAME}}
         size: {{HOST_ATTACHED_VOLUME_SIZE}}
       volume_mountpoint: /dev/vdb
 
