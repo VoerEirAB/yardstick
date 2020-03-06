@@ -18,8 +18,8 @@ import logging
 import collections
 import subprocess
 try:
-    libs = subprocess.check_output(
-        'python -c "import site; print(site.getsitepackages())"', shell=True)
+    libs = str(subprocess.check_output(
+        'python -c "import site; print(site.getsitepackages())"', shell=True))
 
     sys.path.extend(libs[1:-1].replace("'", "").split(','))
 except subprocess.CalledProcessError:
