@@ -36,7 +36,7 @@ class AttackerMgr(object):
             attacker_ins.key = cfg['key']
             attacker_ins.setup()
             self._attacker_list.append(attacker_ins)
-            self.data = dict(self.data.items() + attacker_ins.data.items())
+            self.data = dict(list(self.data.items()) + list(attacker_ins.data.items()))
         return self.data
 
     def __getitem__(self, item):

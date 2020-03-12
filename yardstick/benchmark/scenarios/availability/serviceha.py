@@ -46,7 +46,7 @@ class ServiceHA(base.Scenario):
             attacker_ins = attacker_cls(attacker_cfg, nodes)
             attacker_ins.setup()
             self.attackers.append(attacker_ins)
-            self.data = dict(self.data.items() + attacker_ins.data.items())
+            self.data = dict(list(self.data.items()) + list(attacker_ins.data.items()))
 
         monitor_cfgs = self.scenario_cfg["options"]["monitors"]
 
