@@ -197,16 +197,27 @@ class Fio(base.Scenario):
             result["write_bw"] = raw_data["jobs"][0]["write"]["bw"]
             result["write_iops"] = raw_data["jobs"][0]["write"]["iops"]
             result["write_lat"] = raw_data["jobs"][0]["write"][write_lat_key]["mean"]
+            # converting read_lat and write_lat in ns to us
+            if read_lat_key == 'lat_ns':
+                result['read_lat'] = result['read_lat'] / 1000
+            if write_lat_key == 'lat_ns':
+                result['write_lat'] = result['write_lat'] / 1000
         else:
             # The bandwidth unit is KB/s, and latency unit is us
             if rw in ["read", "randread", "rw", "randrw"]:
                 result["read_bw"] = raw_data["jobs"][0]["read"]["bw"]
                 result["read_iops"] = raw_data["jobs"][0]["read"]["iops"]
                 result["read_lat"] = raw_data["jobs"][0]["read"][read_lat_key]["mean"]
+                # converting read_lat in ns to us
+                if read_lat_key == 'lat_ns':
+                    result['read_lat'] = result['read_lat'] / 1000
             if rw in ["write", "randwrite", "rw", "randrw"]:
                 result["write_bw"] = raw_data["jobs"][0]["write"]["bw"]
                 result["write_iops"] = raw_data["jobs"][0]["write"]["iops"]
                 result["write_lat"] = raw_data["jobs"][0]["write"][write_lat_key]["mean"]
+                # converting read_lat and write_lat in ns to us
+                if write_lat_key == 'lat_ns':
+                    result['write_lat'] = result['write_lat'] / 1000
 
         if "sla" in self.scenario_cfg:
             sla_error = ""
