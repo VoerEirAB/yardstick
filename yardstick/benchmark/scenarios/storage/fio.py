@@ -186,24 +186,27 @@ class Fio(base.Scenario):
             raise RuntimeError(stderr)
 
         raw_data = jsonutils.loads(stdout)
-
+        # Key "lat" in fio-2.2.10.
+        # Key "lat_ns" in fio-3.XX.
+        read_lat_key = "lat" if "lat" in raw_data["jobs"][0]["read"] else "lat_ns"
+        write_lat_key = "lat" if "lat" in raw_data["jobs"][0]["write"] else "lat_ns"
         if self.job_file:
             result["read_bw"] = raw_data["jobs"][0]["read"]["bw"]
             result["read_iops"] = raw_data["jobs"][0]["read"]["iops"]
-            result["read_lat"] = raw_data["jobs"][0]["read"]["lat"]["mean"]
+            result["read_lat"] = raw_data["jobs"][0]["read"][read_lat_key]["mean"]
             result["write_bw"] = raw_data["jobs"][0]["write"]["bw"]
             result["write_iops"] = raw_data["jobs"][0]["write"]["iops"]
-            result["write_lat"] = raw_data["jobs"][0]["write"]["lat"]["mean"]
+            result["write_lat"] = raw_data["jobs"][0]["write"][write_lat_key]["mean"]
         else:
             # The bandwidth unit is KB/s, and latency unit is us
             if rw in ["read", "randread", "rw", "randrw"]:
                 result["read_bw"] = raw_data["jobs"][0]["read"]["bw"]
                 result["read_iops"] = raw_data["jobs"][0]["read"]["iops"]
-                result["read_lat"] = raw_data["jobs"][0]["read"]["lat"]["mean"]
+                result["read_lat"] = raw_data["jobs"][0]["read"][read_lat_key]["mean"]
             if rw in ["write", "randwrite", "rw", "randrw"]:
                 result["write_bw"] = raw_data["jobs"][0]["write"]["bw"]
                 result["write_iops"] = raw_data["jobs"][0]["write"]["iops"]
-                result["write_lat"] = raw_data["jobs"][0]["write"]["lat"]["mean"]
+                result["write_lat"] = raw_data["jobs"][0]["write"][write_lat_key]["mean"]
 
         if "sla" in self.scenario_cfg:
             sla_error = ""
