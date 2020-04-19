@@ -48,6 +48,10 @@ class PktgenDPDKLatency(base.Scenario):
             PktgenDPDKLatency.TESTPMD_SCRIPT)
         host = self.context_cfg['host']
         target = self.context_cfg['target']
+        # for fixed network add key 'ip'
+        for server in [host , target]:
+            if "ip" not in list(server.keys()):
+                server['ip'] = server.get('private_ip', None)
         LOG.info("user:%s, target:%s", target['user'], target['ip'])
         self.server = ssh.SSH.from_node(target, defaults={"user": "ubuntu"})
         self.server.wait(timeout=600)
