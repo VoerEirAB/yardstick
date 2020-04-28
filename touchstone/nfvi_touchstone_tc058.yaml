@@ -103,6 +103,14 @@ contexts:
       availability_zone: {{HOST_AVAILABILITY_ZONE}}
       {% endif %}
   networks:
+    {% if not FLOATING_IP_CREATION_SUPPORT %}
+    {{SSH_NET_NAME}}:
+      subnet: {{SSH_SUBNET_ID}}
+      net_flags:
+        is_existing: true
+      vnic_type: {{VNIC_TYPE}}
+    {% else %}
     test:
       cidr: '10.0.1.0/24'
       vnic_type: {{VNIC_TYPE}}
+    {% endif %}
