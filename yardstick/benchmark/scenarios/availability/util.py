@@ -31,13 +31,20 @@ def execute_shell_command(command):
         output = traceback.format_exc()
         LOG.error("exec command '%s' error:\n ", command)
         LOG.error(traceback.format_exc())
-    return exitcode, output.decode()
+    if isinstance(output, bytes):
+        output = output.decode()
+    return exitcode, output
 
 PREFIX = '@'
 
 
 def build_shell_command(param_config, remote=True, intermediate_variables=None):
     param_template = '/bin/bash -s' if remote else ''
+
+    for key, val in param_config.items():
+        if isinstance(val, bytes):
+            param_config[key] = val.decode()
+
     if intermediate_variables:
         for key, val in param_config.items():
             if str(val).startswith(PREFIX):
@@ -45,7 +52,7 @@ def build_shell_command(param_config, remote=True, intermediate_variables=None):
                     param_config[key] = intermediate_variables[val]
                 except KeyError:
                     pass
-    result = param_template + "".join(" {}".format(v) for v in param_config.values())
+    result = param_template + "".join(" {}".format(v.strip()) for v in param_config.values())
     LOG.debug("THE RESULT OF build_shell_command IS: %s", result)
     return result
 
