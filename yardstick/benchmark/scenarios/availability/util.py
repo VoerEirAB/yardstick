@@ -31,7 +31,7 @@ def execute_shell_command(command):
         output = traceback.format_exc()
         LOG.error("exec command '%s' error:\n ", command)
         LOG.error(traceback.format_exc())
-    return exitcode, output
+    return exitcode, output.decode()
 
 PREFIX = '@'
 
