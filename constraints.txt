@@ -24,7 +24,7 @@ chardet==3.0.4
 Click==7.0
 cliff==2.18.0
 cmd2==0.8.9
-cryptography==41.0.7
+cryptography==41.0.2
 debtcollector==2.0.0
 decorator==4.4.1
 Django==3.0.3
@@ -100,7 +100,7 @@ pycparser==2.19
 pycrypto==2.6.1
 pyinotify==0.9.6
 PyNaCl==1.5.0
-pyOpenSSL==19.1.0
+pyOpenSSL==23.2.0
 pyparsing==2.4.6
 pyperclip==1.7.0
 pyroute2==0.5.7
