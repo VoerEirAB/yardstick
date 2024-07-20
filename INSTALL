@@ -1,0 +1,30 @@
+# Installation of Yardstick
+
+These steps are to setup Yardstick on a Ubuntu 20.04 based machine. The steps can be modified to run on other operating systems.
+
+This installation uses Python 3.8 to setup Yardstick.
+
+## Steps
+
+```bash
+# Update apt package information from the repo(s).
+apt update
+
+# Install basic requirements.
+apt install --assume-yes python3.8-dev python3.8-venv build-essential
+
+# Setup yardstick parent directory.
+YARDSTICK_DIR=/opt/touchstone/yardstick
+mkdir -p ${YARDSTICK_DIR}
+cd ${YARDSTICK_DIR}
+
+# Clone and checkout Yardstick to the desired revision.
+git clone http://git.voereir.io/voereir/yardstick.git src
+git -C src checkout opnfv_7.2.0-T4.1.0  # The tag can be changed to any desired value.
+
+# Setup the Yardstick virtual environment.
+python3.8 -m venv --copies venv
+source venv/bin/activate
+python -m pip install pip==20.0.2 setuptools==65.5.1 wheel==0.33.6
+python -m pip install -r requirements.txt -c constraints.txt
+python -m pip install . -c constraints.txt
